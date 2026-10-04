@@ -1,0 +1,47 @@
+.demo-document { flex-grow: 1; width: 100%; height: 100%; }
+.demo { position: absolute; left: 0; top: 0; right: 0; bottom: 0; color: rgb(231, 240, 250); font-size: 14px; }
+Label { margin: 0; padding: 0; flex-shrink: 0; }
+.game-heading { position: absolute; left: 32px; top: 28px; }
+.eyebrow { color: rgb(102, 218, 235); font-size: 11px; -unity-font-style: bold; }
+.game-title { font-size: 38px; -unity-font-style: bold; margin-top: 5px; }
+.subtitle { color: rgb(152, 174, 199); font-size: 16px; margin-top: 2px; }
+.score-row { flex-direction: row; align-items: center; margin-top: 18px; }
+.score { font-size: 40px; -unity-font-style: bold; }
+.wave { color: rgb(255, 200, 112); font-size: 12px; margin-left: 18px; }
+.game-result { color: rgb(162, 225, 211); font-size: 13px; margin-top: 6px; }
+.hud-panel { position: absolute; top: 24px; right: 24px; bottom: 24px; width: 330px; padding: 18px; background-color: rgba(11, 21, 34, 0.97); border-width: 1px; border-color: rgb(37, 58, 80); border-radius: 18px; }
+.panel-heading { flex-direction: row; align-items: center; justify-content: space-between; }
+.source-mode { font-size: 12px; color: rgb(147, 167, 190); margin-top: 8px; margin-bottom: 18px; }
+.hud-scroll { flex-grow: 1; min-height: 0; }
+.hud-scroll .unity-scroll-view__content-container { flex-shrink: 0; }
+.hud-scroll .unity-scroll-view__content-viewport { overflow: hidden; }
+.hud-scroll .readout, .hud-scroll .section, .hud-scroll .button-row { flex-shrink: 0; }
+.readout { flex-direction: row; justify-content: space-between; margin-bottom: 9px; }
+.readout > Label { font-size: 12px; color: rgb(148, 171, 195); }
+.readout > .value { color: rgb(231, 240, 250); }
+.section { margin-top: 15px; padding-top: 14px; border-top-width: 1px; border-top-color: rgb(32, 48, 67); }
+.caption { font-size: 12px; color: rgb(148, 171, 195); white-space: normal; margin-top: 8px; }
+.meter { height: 7px; background-color: rgb(31, 50, 66); border-radius: 4px; overflow: hidden; }
+.meter-fill { width: 0; height: 7px; background-color: rgb(90, 228, 161); }
+.event-history { color: rgb(200, 219, 237); font-size: 12px; white-space: normal; min-height: 58px; margin-top: 8px; }
+.button-row { flex-direction: row; margin-top: 8px; }
+Button { margin: 0; padding: 7px 10px; border-width: 0; border-radius: 7px; font-size: 12px; -unity-text-align: middle-center; white-space: normal; flex-shrink: 0; }
+.button-row > Button { flex-grow: 1; margin-right: 6px; }
+.quiet-button { background-color: rgb(30, 47, 65); color: rgb(216, 232, 248); }
+.primary-button { background-color: rgb(34, 120, 135); color: white; }
+.mode-button { border-width: 1px; border-color: rgb(45, 65, 85); background-color: rgb(30, 47, 65); color: rgb(216, 232, 248); }
+.mode-button.is-selected { border-color: rgb(102, 218, 235); background-color: rgb(28, 77, 92); color: white; }
+.motion-controls { margin-bottom: 12px; flex-shrink: 0; }
+.motion-controls > Button { margin-top: 8px; }
+.motion-controls .caption { margin-bottom: 4px; }
+Button:hover { background-color: rgb(46, 84, 105); }
+Button:disabled { opacity: 0.4; }
+.keyboard-hints { color: rgb(117, 145, 173); }
+.world-legend { position: absolute; left: 32px; bottom: 24px; color: rgb(120, 151, 180); font-size: 11px; }
+.portrait .game-heading { left: 24px; top: 48px; }
+.portrait .hud-panel { left: 20px; right: 20px; top: auto; bottom: 28px; width: auto; height: 44%; }
+.portrait .readout > Label { font-size: 18px; }
+.portrait .caption, .portrait .event-history, .portrait Button { font-size: 16px; }
+.portrait .source-mode { font-size: 16px; margin-bottom: 12px; }
+.portrait .eyebrow { font-size: 14px; }
+.portrait .world-legend { display: none; }

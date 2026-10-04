@@ -487,7 +487,11 @@ public readonly struct AppleWatchInputFrame
         return (float.IsNaN(value) || float.IsInfinity(value)) ? 0f : value;
     }
 
-    internal static bool TryNormalizeAttitude(Quaternion value, out Quaternion normalized)
+    /// <summary>Normalizes a finite, nonzero attitude quaternion without float overflow or underflow.</summary>
+    /// <param name="value">The attitude to validate and normalize.</param>
+    /// <param name="normalized">The unit attitude on success; identity on failure.</param>
+    /// <returns>True for a finite, nonzero quaternion; otherwise false.</returns>
+    public static bool TryNormalizeAttitude(Quaternion value, out Quaternion normalized)
     {
         normalized = Quaternion.identity;
         if (!float.IsFinite(value.x) || !float.IsFinite(value.y) || !float.IsFinite(value.z) || !float.IsFinite(value.w))

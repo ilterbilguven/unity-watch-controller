@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:watch="WatchUI">
+    <watch:watch-v-stack spacing="8" alignment="center">
+        <watch:watch-text label="Basic Controller"/>
+        <watch:watch-joystick watch-id="move" radius="48" dead-zone="0.1"/>
+        <watch:watch-button watch-id="fire" label="Fire" action="primary"/>
+    </watch:watch-v-stack>
+</ui:UXML>

@@ -1,0 +1,78 @@
+.gallery-shell {
+    color: rgb(237, 245, 255);
+    background-color: rgb(7, 12, 19);
+    font-size: 14px;
+}
+.gallery-page {
+    padding-top: 8px;
+    padding-bottom: 14px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.gallery-heading { font-size: 24px; -unity-font-style: bold; }
+.gallery-title { font-size: 20px; -unity-font-style: bold; }
+.gallery-eyebrow { font-size: 10px; color: rgb(111, 213, 229); -unity-font-style: bold; }
+.gallery-caption { font-size: 11px; color: rgb(151, 168, 189); white-space: normal; }
+.gallery-body { font-size: 14px; white-space: normal; }
+.gallery-row-title { font-size: 14px; -unity-font-style: bold; }
+.gallery-caption, .gallery-row-title { -unity-text-align: middle-left; }
+.gallery-link, .gallery-surface {
+    align-self: stretch;
+    background-color: rgb(20, 31, 46);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    min-height: 44px;
+}
+.gallery-icon {
+    color: rgb(111, 213, 229);
+    font-size: 22px;
+    min-width: 22px; max-width: 22px;
+    min-height: 22px; max-height: 22px;
+}
+.gallery-chevron {
+    color: rgb(103, 128, 158);
+    font-size: 10px;
+    min-width: 10px; max-width: 10px;
+    min-height: 10px; max-height: 10px;
+}
+.gallery-primary, .gallery-pad {
+    align-self: stretch;
+    color: rgb(181, 245, 255);
+    background-color: rgb(14, 46, 63);
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+    padding-top: 14px;
+    padding-bottom: 14px;
+    padding-left: 12px;
+    padding-right: 12px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
+    min-height: 56px;
+}
+.gallery-pad { min-height: 112px; }
+.gallery-input-page {
+    padding-top: 2px;
+    padding-bottom: 4px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+.gallery-input-page .gallery-title { font-size: 17px; }
+.gallery-input-pad {
+    min-height: 88px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+}
+.gallery-cell {
+    background-color: rgb(20, 31, 46);
+    padding-top: 12px; padding-bottom: 12px;
+    padding-left: 16px; padding-right: 16px;
+    -unity-text-align: middle-center;
+}

@@ -27,7 +27,7 @@ public sealed class PackageDependencyTests
             .Any(a => a.Name.Contains("Universal") || a.Name.Contains("Unity.Pipeline")), Is.False);
         var manifest = File.ReadAllText(WatchPackagePaths.FilePath("package.json"));
         Assert.That(manifest, Does.Not.Contain("com.unity.pipeline"));
-        Assert.That(manifest, Does.Not.Contain("com.unity.render-pipelines"));
+        Assert.That(manifest, Does.Contain("\"com.unity.render-pipelines.universal\": \"17.7.0\""));
         Assert.That(manifest, Does.Not.Contain("com.unity.ide.rider"));
     }
 

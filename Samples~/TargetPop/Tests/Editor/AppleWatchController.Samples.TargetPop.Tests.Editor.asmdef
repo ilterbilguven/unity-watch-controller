@@ -1,0 +1,17 @@
+{
+    "name": "AppleWatchController.Samples.TargetPop.Tests.Editor",
+    "references": [
+        "AppleWatchController.Samples.TargetPop.Runtime",
+        "AppleWatchController.Samples.TargetPop.Editor",
+        "AppleWatchController.Runtime",
+        "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}

@@ -59,6 +59,7 @@ public sealed class PipelineIntegrationTests
         File.WriteAllText(path, "<ui:UXML xmlns:ui=\"UnityEngine.UIElements\" xmlns:watch=\"WatchUI\"><watch:watch-text label=\"Pipeline export proof\" /></ui:UXML>");
         AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceSynchronousImport);
         var command = FindCommand("watch_ui_export");
+        LogAssert.Expect(LogType.Warning, "[AppleWatch] Watch UI conversion warning: USS width/height are not exported: public resolved styles cannot distinguish authored dimensions from auto layout. Use min/max size constraints or supported align-self: stretch instead.");
         var task = (Task<WatchUiExportResult>)command.Method.Invoke(null, new object[] { path });
         yield return Await(task);
         Assert.That(task.Result.Status, Is.EqualTo("success"));
@@ -67,6 +68,19 @@ public sealed class PipelineIntegrationTests
         Assert.That(File.ReadAllText(task.Result.OutputPath), Does.Contain("Text(\"Pipeline export proof\")"));
         Assert.That(File.ReadAllText(statePath), Does.Contain(path));
         AssertDirectCall(command.Method, typeof(WatchUiExportMenu).GetMethod("ExportWatchUiWithExplicitPathAsync"));
+    }
+
+    [Test]
+    public void TargetPopCommandsPreserveNamesAndRequireExplicitSampleRoot()
+    {
+        CheckCommand("watch_demo_create", "AppleWatchController.Samples.TargetPop.Pipeline.Editor", "sample_root", "scene_path", "make_startup_scene");
+        Assert.That(FindCommand("watch_demo_create").Method.GetParameters()[2].DefaultValue, Is.EqualTo(false));
+        foreach (var name in new[] { "watch_demo_state", "watch_demo_pose", "watch_demo_simulate", "watch_demo_ui", "watch_demo_capture" })
+        {
+            var command = FindCommand(name);
+            Assert.That(command.Method.DeclaringType.Assembly.GetName().Name, Is.EqualTo("AppleWatchController.Samples.TargetPop.Pipeline.Editor"));
+            Assert.That(command.MainThreadRequired, Is.True);
+        }
     }
 
     [UnityTest]
@@ -92,7 +106,7 @@ public sealed class PipelineIntegrationTests
     [Test]
     public void RegisteredBuildCommandsDelegateWithoutChangingSettingsOnRejection()
     {
-        var service = AppDomain.CurrentDomain.GetAssemblies().Single(a => a.GetName().Name == "AppleWatchController.Build.Editor")
+        var service = UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies().Single(a => a.GetName().Name == "AppleWatchController.Build.Editor")
             .GetType("AppleWatchController.Editor.AppleWatchBuildService", true);
         var settingsPath = Path.GetFullPath(Path.Combine(Application.dataPath, "../ProjectSettings/ProjectSettings.asset"));
         var before = File.ReadAllBytes(settingsPath);

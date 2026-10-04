@@ -1,0 +1,20 @@
+{
+    "name": "AppleWatchController.Samples.TargetPop.Pipeline.Editor",
+    "references": [
+        "AppleWatchController.Samples.TargetPop.Editor",
+        "Unity.Pipeline"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "defineConstraints": [
+        "WATCH_CONTROLLER_PIPELINE"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.unity.pipeline",
+            "expression": "[0.7.0-exp.1,0.8.0-exp.1)",
+            "define": "WATCH_CONTROLLER_PIPELINE"
+        }
+    ]
+}

@@ -1,0 +1,13 @@
+{
+    "name": "AppleWatchController.Samples.TargetPop.Editor",
+    "references": [
+        "AppleWatchController.Samples.TargetPop.Runtime",
+        "AppleWatchController.Runtime",
+        "AppleWatchController.Editor",
+        "Unity.InputSystem",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

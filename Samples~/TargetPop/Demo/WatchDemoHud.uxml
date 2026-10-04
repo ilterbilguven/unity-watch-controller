@@ -1,0 +1,76 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:Style src="WatchDemoHud.uss" />
+    <ui:VisualElement name="demo" class="demo" picking-mode="Ignore">
+        <ui:VisualElement class="game-heading" picking-mode="Ignore">
+            <ui:Label text="APPLE WATCH / PLAYGROUND" class="eyebrow" />
+            <ui:Label text="Target Pop" class="game-title" />
+            <ui:Label text="Move. Aim. Pop every beacon." class="subtitle" />
+            <ui:VisualElement class="score-row">
+                <ui:Label name="score" text="0000" class="score" />
+                <ui:Label name="wave" text="WAVE 01" class="wave" />
+            </ui:VisualElement>
+            <ui:Label name="game-result" text="Button fires • Crown aims" class="game-result" />
+        </ui:VisualElement>
+        <ui:VisualElement class="hud-panel">
+            <ui:VisualElement class="panel-heading">
+                <ui:Label text="LIVE INPUT" class="eyebrow" />
+                <ui:Button name="reset" text="Reset game" class="quiet-button" />
+            </ui:VisualElement>
+            <ui:Label name="input-mode" text="Input System" class="source-mode" />
+            <ui:ScrollView class="hud-scroll" horizontal-scroller-visibility="Hidden">
+                <ui:VisualElement class="readout"><ui:Label text="Joystick" /><ui:Label name="move-value" text="0.00 / 0.00" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="readout"><ui:Label text="Crown" /><ui:Label name="crown-value" text="0.00" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="motion-controls">
+                    <ui:Label text="VIOLET MOTION INDICATOR" class="eyebrow" />
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="orientation-mode" text="Orientation" class="mode-button" />
+                        <ui:Button name="angular-velocity-mode" text="Angular velocity" class="mode-button" />
+                    </ui:VisualElement>
+                    <ui:Label name="motion-description" text="Orientation holds its angle when still." class="caption" />
+                    <ui:Label name="orientation-status" text="Orientation unavailable (off or stale)" class="caption" />
+                    <ui:Button name="center-orientation" text="Center orientation" class="quiet-button" />
+                    <ui:Label name="attitude-value" text="No tracked pose" class="caption" />
+                </ui:VisualElement>
+                <ui:VisualElement class="readout"><ui:Label text="Acceleration" /><ui:Label name="acceleration-value" text="0.00 / 0.00 / 0.00" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="readout"><ui:Label name="gyro-label" text="Gyro (rad/s)" /><ui:Label name="gyro-value" text="0.00 / 0.00 / 0.00" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="readout"><ui:Label text="Touch point" /><ui:Label name="touch-value" text="0 / 0" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="readout"><ui:Label text="Value channel" /><ui:Label name="axis-value" text="0.00" class="value" /></ui:VisualElement>
+                <ui:VisualElement class="section">
+                    <ui:VisualElement class="readout"><ui:Label text="Microphone" /><ui:Label name="mic-value" text="LEVEL 0% / PEAK 0%" class="value" /></ui:VisualElement>
+                    <ui:VisualElement class="meter"><ui:VisualElement name="mic-fill" class="meter-fill" /></ui:VisualElement>
+                    <ui:Label text="The green pillar follows microphone level." class="caption" />
+                </ui:VisualElement>
+                <ui:VisualElement class="section">
+                    <ui:Label text="OBSERVED CADENCE" class="eyebrow" />
+                    <ui:Label name="update-rate" text="Game Update: measuring…" class="caption" />
+                    <ui:Label name="transport-stats" text="Native input: no fresh frames yet" class="caption" />
+                    <ui:Label name="motion-sample" text="Motion sample step: unavailable" class="caption" />
+                    <ui:Label text="Receive cadence and queue age are not end-to-end latency." class="caption" />
+                </ui:VisualElement>
+                <ui:VisualElement class="section">
+                    <ui:Label text="RECENT ACTIONS" class="eyebrow" />
+                    <ui:Label name="reset-count" text="Resets: 0" class="caption" />
+                    <ui:Label name="events" text="Waiting for input…" class="event-history" />
+                </ui:VisualElement>
+                <ui:VisualElement class="section">
+                    <ui:Label text="AUDIO" class="eyebrow" />
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="effects" text="Effects: on" class="quiet-button" />
+                        <ui:Button name="test-sound" text="Test sound" class="quiet-button" />
+                    </ui:VisualElement>
+                    <ui:Label name="recording-status" text="No Watch recording received." class="caption" />
+                    <ui:VisualElement class="button-row">
+                        <ui:Button name="play-recording" text="Play recording" class="primary-button" />
+                        <ui:Button name="stop-recording" text="Stop" class="quiet-button" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
+                <ui:VisualElement class="section">
+                    <ui:Label text="HOW TO PLAY" class="eyebrow" />
+                    <ui:Label text="Joystick moves • Crown aims&#10;Button / Touchpad tap fires • Four-way swipe dashes&#10;HOLD for 1 second resets the game" class="caption" />
+                    <ui:Label name="keyboard-hints" class="caption keyboard-hints" text="EDITOR: WASD move · Q/E aim · Space/T fire&#10;Arrows dash · Y double tap · L reset&#10;I/K J/H U/O acceleration · 1–6 gyro&#10;Shift + R/F/V/N touch · X drag/value&#10;M microphone level · comma peak" />
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+        <ui:Label class="world-legend" text="CYAN: AIM     VIOLET: MOTION     GREEN: AUDIO     AMBER: VALUE" picking-mode="Ignore" />
+    </ui:VisualElement>
+</ui:UXML>

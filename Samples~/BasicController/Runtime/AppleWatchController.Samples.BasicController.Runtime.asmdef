@@ -1,0 +1,7 @@
+{
+    "name": "AppleWatchController.Samples.BasicController.Runtime",
+    "references": [
+        "AppleWatchController.Runtime",
+        "Unity.InputSystem"
+    ]
+}

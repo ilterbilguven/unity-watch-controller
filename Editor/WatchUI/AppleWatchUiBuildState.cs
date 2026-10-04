@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using UnityEditor;
@@ -255,7 +256,7 @@ namespace AppleWatchController.Editor
 
         private static string ComputeGeneratorSha256()
         {
-            var assemblyPaths = new[] { typeof(WatchUiSwiftEmitter).Assembly.Location, typeof(AppleWatchUiBuildState).Assembly.Location };
+            var assemblyPaths = new[] { typeof(WatchUiSwiftEmitter).Assembly.GetLoadedAssemblyPath(), typeof(AppleWatchUiBuildState).Assembly.GetLoadedAssemblyPath() };
             var inputs = new StringBuilder(Application.unityVersion);
             foreach (var assemblyPath in assemblyPaths)
             {

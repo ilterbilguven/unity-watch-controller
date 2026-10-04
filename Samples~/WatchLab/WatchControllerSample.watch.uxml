@@ -1,0 +1,425 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:watch="WatchUI">
+    <ui:Style src="WatchControllerGallery.uss"/>
+    <watch:watch-navigation-stack watch-id="root" class="gallery-shell">
+        <watch:watch-scroll-view watch-id="controllerPage" axes="vertical" shows-indicators="true">
+            <watch:watch-v-stack spacing="8" alignment="leading" class="gallery-page">
+                <watch:watch-text label="COMPONENT GALLERY" class="gallery-eyebrow"/>
+                <watch:watch-text label="Watch Lab" class="gallery-heading"/>
+                <watch:watch-text label="Pick a component to try." class="gallery-caption"/>
+                <watch:watch-navigation-link watch-id="go-controls" route="controls" title="Controls" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="gamecontroller" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Controls" class="gallery-row-title"/>
+                            <watch:watch-text label="Buttons and values" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-touch" route="touch" title="Touch" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Touch" class="gallery-row-title"/>
+                            <watch:watch-text label="Touchpad and gestures" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-hand-gestures" route="hand-gestures" title="Hand Gestures" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Hand Gestures" class="gallery-row-title"/>
+                            <watch:watch-text label="Thumb and index double tap" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-crown" route="crown" title="Digital Crown" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="digitalcrown.horizontal.arrow.clockwise" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Digital Crown" class="gallery-row-title"/>
+                            <watch:watch-text label="Rotation input" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-motion" route="motion" title="Motion" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="gyroscope" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Motion" class="gallery-row-title"/>
+                            <watch:watch-text label="Acceleration and rotation" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-audio" route="audio" title="Audio" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="mic" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Audio" class="gallery-row-title"/>
+                            <watch:watch-text label="Record and transfer" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+                <watch:watch-navigation-link watch-id="go-components" route="components" title="Components" class="gallery-link">
+                    <watch:watch-h-stack spacing="9" alignment="center">
+                        <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                        <watch:watch-v-stack spacing="3" alignment="leading">
+                            <watch:watch-text label="Components" class="gallery-row-title"/>
+                            <watch:watch-text label="Visual examples" class="gallery-caption"/>
+                        </watch:watch-v-stack>
+                        <watch:watch-spacer min-length="0"/>
+                        <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                    </watch:watch-h-stack>
+                </watch:watch-navigation-link>
+            </watch:watch-v-stack>
+        </watch:watch-scroll-view>
+        <watch:watch-navigation-destination route="controls">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Controls" class="gallery-title"/>
+                    <watch:watch-text label="Each control has its own test page." class="gallery-caption"/>
+                    <watch:watch-navigation-link watch-id="go-button" route="button" title="Button" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="gamecontroller" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Button" class="gallery-row-title"/>
+                                <watch:watch-text label="A single action" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-joystick" route="joystick" title="Joystick" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="gamecontroller" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Joystick" class="gallery-row-title"/>
+                                <watch:watch-text label="Two-axis input" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-values" route="values" title="Values" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="slider.horizontal.3" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Values" class="gallery-row-title"/>
+                                <watch:watch-text label="Toggle and slider" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-selection" route="selection" title="Selection" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Selection" class="gallery-row-title"/>
+                                <watch:watch-text label="Stepper and picker" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-text" route="text" title="Text" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Text" class="gallery-row-title"/>
+                                <watch:watch-text label="Type and submit" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="button">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Button" class="gallery-title"/>
+                    <watch:watch-text label="Tap to trigger the primary input action." class="gallery-caption"/>
+                    <watch:watch-button watch-id="fire" label="TAP" action="primary" class="gallery-primary"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="joystick">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Joystick" class="gallery-title"/>
+                <watch:watch-text label="Drag to move. Release to center." class="gallery-caption"/>
+                <watch:watch-joystick watch-id="joystick" label="Drag" action="joystickChanged" radius="36" dead-zone="6" spring-return="true" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="values">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Values" class="gallery-title"/>
+                    <watch:watch-text label="Demo controls, not game settings." class="gallery-caption"/>
+                    <watch:watch-toggle watch-id="sound" label="Toggle" value="false" class="gallery-surface"/>
+                    <watch:watch-slider watch-id="volume" label="Value" minimum="0" maximum="1" value="0.55" step="0.05" class="gallery-surface"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="selection">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Selection" class="gallery-title"/>
+                    <watch:watch-text label="Numeric and option-based input." class="gallery-caption"/>
+                    <watch:watch-stepper watch-id="difficulty" label="Step" minimum="0" maximum="5" value="2" step="1" action="difficultyChanged" class="gallery-surface"/>
+                    <watch:watch-picker watch-id="mode" label="Mode" selection="casual" picker-style="wheel" action="modeChanged">
+                        <watch:watch-picker-option value="casual" label="Casual"/>
+                        <watch:watch-picker-option value="expert" label="Expert"/>
+                    </watch:watch-picker>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="text">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Text" class="gallery-title"/>
+                    <watch:watch-text label="Finish editing to send a submit action." class="gallery-caption"/>
+                    <watch:watch-textfield watch-id="playerName" title="Text" prompt="Type something" text-binding="name" submit-action="nameCommit" autocorrection="false" class="gallery-surface"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="touch">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Touch" class="gallery-title"/>
+                    <watch:watch-text label="Choose a gesture to test." class="gallery-caption"/>
+                    <watch:watch-navigation-link watch-id="go-touchpad" route="touchpad" title="Touchpad" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Touchpad" class="gallery-row-title"/>
+                                <watch:watch-text label="Combined touch surface" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-tap" route="tap" title="Tap" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Tap" class="gallery-row-title"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-double-tap" route="double-tap" title="Double tap" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Double tap" class="gallery-row-title"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-long-press" route="long-press" title="Long press" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Long press" class="gallery-row-title"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-swipe" route="swipe" title="Swipe" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Swipe" class="gallery-row-title"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-drag" route="drag" title="Drag" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="hand.tap" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Drag" class="gallery-row-title"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="touchpad">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Touchpad" class="gallery-title"/>
+                <watch:watch-text label="Tap, double-tap, or drag." class="gallery-caption"/>
+                <watch:watch-touchpad watch-id="pad" label="TAP / DRAG" action="touchpad" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="tap">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Tap" class="gallery-title"/>
+                <watch:watch-text label="Tap the area once." class="gallery-caption"/>
+                <watch:watch-gesture-area watch-id="tapArea" label="TAP" gesture="tap" action="onTap" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="double-tap">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Double tap" class="gallery-title"/>
+                <watch:watch-text label="Tap twice quickly." class="gallery-caption"/>
+                <watch:watch-gesture-area watch-id="doubleTapArea" label="DOUBLE TAP" gesture="double-tap" action="onDoubleTap" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="long-press">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Long press" class="gallery-title"/>
+                <watch:watch-text label="Hold 1 second to reset." class="gallery-caption"/>
+                <watch:watch-gesture-area watch-id="longPressArea" label="HOLD TO RESET" gesture="long-press" action="onLongPress" minimum-duration="1" maximum-distance="30" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="swipe">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Swipe" class="gallery-title"/>
+                <watch:watch-text label="Swipe up, down, left, or right." class="gallery-caption"/>
+                <watch:watch-gesture-area watch-id="swipeArea" label="SWIPE ANY DIRECTION" gesture="swipe" action="onSwipe" minimum-distance="32" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="drag">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Drag" class="gallery-title"/>
+                <watch:watch-text label="Drag across the area, then release." class="gallery-caption"/>
+                <watch:watch-gesture-area watch-id="dragArea" label="DRAG" gesture="drag" action="onDrag" minimum-distance="8" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="hand-gestures">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Hand Gestures" class="gallery-title"/>
+                <watch:watch-text label="Tap thumb and index finger together twice." class="gallery-caption"/>
+                <watch:watch-button watch-id="handPrimary" label="FIRE" action="primary" hand-gesture-shortcut="PrimaryAction" class="gallery-primary"/>
+                <watch:watch-text label="Touch fallback: same action, not proof of hand input." class="gallery-caption"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="crown">
+            <watch:watch-v-stack alignment="leading" spacing="6" class="gallery-input-page">
+                <watch:watch-text label="Digital Crown" class="gallery-title"/>
+                <watch:watch-text label="Tap to focus. Turn to aim." class="gallery-caption"/>
+                <watch:watch-crown watch-id="crown" label="CROWN" action="crown" class="gallery-pad gallery-input-pad"/>
+            </watch:watch-v-stack>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="motion">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Motion" class="gallery-title"/>
+                    <watch:watch-text label="Start, then move your wrist. Stops when you leave." class="gallery-caption"/>
+                    <watch:watch-motion watch-id="motion" label="Start motion" action="watchMotion" update-interval="0.05" include-acceleration="true" include-gyro="true" include-attitude="true" class="gallery-primary"/>
+                    <watch:watch-text label="Orientation + acceleration + gyro" class="gallery-caption"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="audio">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Audio" class="gallery-title"/>
+                    <watch:watch-text label="Record a short clip and send it to iPhone." class="gallery-caption"/>
+                    <watch:watch-microphone watch-id="microphone" label="Start recording" action="watchMicrophone" update-interval="0.2" class="gallery-surface"/>
+                    <watch:watch-text label="After granting permission, tap again if needed." class="gallery-caption"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="components">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Components" class="gallery-title"/>
+                    <watch:watch-text label="All values in this section are demo data." class="gallery-caption"/>
+                    <watch:watch-navigation-link watch-id="go-indicators" route="indicators" title="Indicators" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Indicators" class="gallery-row-title"/>
+                                <watch:watch-text label="Progress and gauge" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-list" route="list" title="List" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="List" class="gallery-row-title"/>
+                                <watch:watch-text label="A separate scroll area" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                    <watch:watch-navigation-link watch-id="go-layout" route="layout" title="Layout" class="gallery-link">
+                        <watch:watch-h-stack spacing="9" alignment="center">
+                            <watch:watch-image system-name="square.grid.2x2" class="gallery-icon"/>
+                            <watch:watch-v-stack spacing="3" alignment="leading">
+                                <watch:watch-text label="Layout" class="gallery-row-title"/>
+                                <watch:watch-text label="Grid, icons, and text" class="gallery-caption"/>
+                            </watch:watch-v-stack>
+                            <watch:watch-spacer min-length="0"/>
+                            <watch:watch-image system-name="chevron.right" class="gallery-chevron"/>
+                        </watch:watch-h-stack>
+                    </watch:watch-navigation-link>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="indicators">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Indicators" class="gallery-title"/>
+                    <watch:watch-text label="Fixed sample values, not live device data." class="gallery-caption"/>
+                    <watch:watch-progress-view watch-id="loadProgress" label="Progress · demo" value="0.4" total="1" progress-style="linear"/>
+                    <watch:watch-gauge watch-id="battery" label="Gauge · demo" value="0.72" minimum="0" maximum="1" gauge-style="circular" current-value-label="72%"/>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="list">
+            <watch:watch-list watch-id="items" list-style="plain">
+                <watch:watch-text label="List · demo" class="gallery-title"/>
+                <watch:watch-text label="First row" class="gallery-body"/>
+                <watch:watch-text label="Second row" class="gallery-body"/>
+            </watch:watch-list>
+        </watch:watch-navigation-destination>
+        <watch:watch-navigation-destination route="layout">
+            <watch:watch-scroll-view axes="vertical" shows-indicators="true">
+                <watch:watch-v-stack alignment="leading" spacing="12" class="gallery-page">
+                    <watch:watch-text label="Layout" class="gallery-title"/>
+                    <watch:watch-text label="Stacks, grids, and symbols." class="gallery-caption"/>
+                    <watch:watch-label watch-id="statusText" title="SF Symbol example" system-image="wifi"/>
+                    <watch:watch-divider/>
+                    <watch:watch-grid watch-id="grid" horizontal-spacing="8" vertical-spacing="8">
+                        <watch:watch-grid-row watch-id="gridRowOne">
+                            <watch:watch-text label="A1" class="gallery-cell"/>
+                            <watch:watch-text label="A2" class="gallery-cell"/>
+                        </watch:watch-grid-row>
+                        <watch:watch-grid-row watch-id="gridRowTwo">
+                            <watch:watch-text label="B1" class="gallery-cell"/>
+                            <watch:watch-text label="B2" class="gallery-cell"/>
+                        </watch:watch-grid-row>
+                    </watch:watch-grid>
+                </watch:watch-v-stack>
+            </watch:watch-scroll-view>
+        </watch:watch-navigation-destination>
+    </watch:watch-navigation-stack>
+</ui:UXML>

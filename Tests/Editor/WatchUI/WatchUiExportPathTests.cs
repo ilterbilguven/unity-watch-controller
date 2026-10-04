@@ -13,8 +13,11 @@ using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 
+[TestFixture("Assets/Samples/Apple Watch Controller/0.1.0-preview.1/Watch Lab")]
 public sealed class WatchUiExportPathTests
 {
+    private readonly string sampleRoot;
+    public WatchUiExportPathTests(string sampleRoot) => this.sampleRoot = sampleRoot;
     private string folder;
     private string sourcePath;
     private string statePath;
@@ -44,6 +47,28 @@ public sealed class WatchUiExportPathTests
             File.WriteAllBytes(statePath, previousState);
         else if (File.Exists(statePath))
             File.Delete(statePath);
+    }
+
+    [UnityTest]
+    public IEnumerator ExportActualGalleryPreservesEnglishCategoriesAndCustomRows()
+    {
+        RequireSwiftToolchain();
+        var stylesheetPath = folder + "/WatchControllerGallery.uss";
+        File.Copy(sampleRoot + "/WatchControllerGallery.uss", stylesheetPath);
+        AssetDatabase.ImportAsset(stylesheetPath, ImportAssetOptions.ForceSynchronousImport);
+        File.Copy(sampleRoot + "/WatchControllerSample.watch.uxml", sourcePath);
+        AssetDatabase.ImportAsset(sourcePath, ImportAssetOptions.ForceSynchronousImport);
+
+        yield return ExportSource();
+        var swift = File.ReadAllText(folder + "/Latest.generated.swift");
+        Assert.That(swift, Does.Contain("Text(\"Watch Lab\")"));
+        foreach (var category in new[] { "Controls", "Touch", "Digital Crown", "Motion", "Audio", "Components" })
+            Assert.That(swift, Does.Contain("Text(\"" + category + "\")"));
+        Assert.That(swift, Does.Contain("NavigationLink(value: \"controls\") {"));
+        Assert.That(swift, Does.Contain("Image(systemName: \"gamecontroller\")"));
+        Assert.That(swift, Does.Contain("Text(\"Buttons and values\")"));
+        Assert.That(swift,
+            Does.Contain(".padding(EdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10))"));
     }
 
     [UnityTest]

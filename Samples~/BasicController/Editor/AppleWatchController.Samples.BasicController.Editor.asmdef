@@ -1,0 +1,12 @@
+{
+    "name": "AppleWatchController.Samples.BasicController.Editor",
+    "references": [
+        "AppleWatchController.Samples.BasicController.Runtime",
+        "AppleWatchController.Runtime",
+        "AppleWatchController.Editor",
+        "Unity.RenderPipelines.Universal.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ]
+}

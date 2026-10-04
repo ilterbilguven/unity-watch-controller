@@ -6,7 +6,13 @@
   "unity": "6000.7",
   "unityRelease": "0b2",
   "license": "MIT",
+  "samples": [
+    { "displayName": "Basic Controller", "description": "A small controller scene for URP.", "path": "Samples~/BasicController" },
+    { "displayName": "Watch Lab", "description": "The source-authored Watch component gallery.", "path": "Samples~/WatchLab" },
+    { "displayName": "Target Pop", "description": "The full controller game. Requires URP 17.7.0.", "path": "Samples~/TargetPop" }
+  ],
   "dependencies": {
-    "com.unity.inputsystem": "6.7.0"
+    "com.unity.inputsystem": "6.7.0",
+    "com.unity.render-pipelines.universal": "17.7.0"
   }
 }
