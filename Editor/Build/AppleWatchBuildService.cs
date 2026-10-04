@@ -106,8 +106,8 @@ namespace AppleWatchController.Editor
             }
         }
 
-        [MenuItem("Tools/AppleWatch/Export iOS Device Xcode Project")]
-        private static void ExportDeviceFromMenu() => ExportFromMenu(false);
+        [MenuItem("Tools/AppleWatch/Export iOS Xcode Project (Current SDK)")]
+        private static void ExportCurrentSdkFromMenu() => ExportFromMenu(false);
 
         [MenuItem("Tools/AppleWatch/Export iOS Simulator Xcode Project")]
         private static void ExportSimulatorFromMenu() => ExportFromMenu(true);

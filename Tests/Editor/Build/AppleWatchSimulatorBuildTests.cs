@@ -10,6 +10,19 @@ using UnityEditor.Build;
 public sealed class AppleWatchSimulatorBuildTests
 {
     [Test]
+    public void CurrentSdkExportMenuDoesNotPromiseADeviceSdk()
+    {
+        var exportMenus = BuildCommandType.GetMethods(BindingFlags.NonPublic | BindingFlags.Static)
+            .SelectMany(method => method.GetCustomAttributes(typeof(MenuItem), false).Cast<MenuItem>())
+            .Select(menu => menu.menuItem).ToArray();
+        Assert.That(exportMenus.Count(menu => menu == "Tools/AppleWatch/Export iOS Xcode Project (Current SDK)"),
+            Is.EqualTo(1), "The non-overriding SDK scope must be named as a current-SDK export.");
+        Assert.That(exportMenus, Does.Not.Contain("Tools/AppleWatch/Export iOS Device Xcode Project"));
+        Assert.That(exportMenus.Count(menu => menu == "Tools/AppleWatch/Export iOS Simulator Xcode Project"),
+            Is.EqualTo(1));
+    }
+
+    [Test]
     public void IosSdkDiagnosticDoesNotWriteProjectSettings()
     {
         var path = Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, "../ProjectSettings/ProjectSettings.asset"));
