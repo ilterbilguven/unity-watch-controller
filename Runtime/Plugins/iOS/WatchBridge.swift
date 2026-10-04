@@ -621,10 +621,9 @@ private final class WatchSessionManager: NSObject, WCSessionDelegate
 
         if let number = raw as? NSNumber
         {
-            let doubleValue = number.doubleValue
-            guard doubleValue.isFinite else { return nil }
-            guard doubleValue == Double(Int(doubleValue)) else { return nil }
-            return Int(doubleValue)
+            // Keep exact integer boundaries before a Double can round them.
+            // Int(exactly:) rejects fractional, nonfinite and overflow values.
+            return Int(number.stringValue) ?? Int(exactly: number.doubleValue)
         }
         if let text = raw as? String
         {

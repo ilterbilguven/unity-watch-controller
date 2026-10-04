@@ -70,6 +70,36 @@ private func encodedFloat(_ bytes: [UInt8], at offset: Int) -> Float
 private var failures = 0
 private var passes = 0
 
+// Each malformed number runs in a child process: the old parser traps before
+// returning nil. The tested method below is extracted verbatim from production.
+let parserCases: [(String, NSNumber, Int?)] = [
+    ("positive overflow", NSNumber(value: 1e100), nil),
+    ("negative overflow", NSNumber(value: -1e100), nil),
+    ("positive rounded boundary overflow", NSNumber(value: Double(Int.max)), nil),
+    ("minimum integer boundary", NSNumber(value: Int.min), Int.min),
+    ("maximum integer boundary", NSNumber(value: Int.max), Int.max),
+    ("unsigned overflow", NSNumber(value: UInt64.max), nil),
+    ("fraction", NSNumber(value: 2.5), nil),
+    ("positive infinity", NSNumber(value: Double.infinity), nil),
+    ("negative infinity", NSNumber(value: -Double.infinity), nil),
+    ("NaN", NSNumber(value: Double.nan), nil),
+    ("valid kind ID", NSNumber(value: 17), 17),
+    ("integral floating kind ID", NSNumber(value: 17.0), 17),
+    ("negative integer", NSNumber(value: -17), -17)
+]
+if CommandLine.arguments.count == 3 && CommandLine.arguments[1] == "--parser-case",
+   let index = Int(CommandLine.arguments[2])
+{
+    let item = parserCases[index]
+    let actual = ProductionParser().parse(item.1)
+    if actual != item.2
+    {
+        print("Expected \(String(describing: item.2)), got \(String(describing: actual))")
+        exit(1)
+    }
+    exit(0)
+}
+
 private func test(_ name: String, _ body: () throws -> Void)
 {
     do
@@ -82,6 +112,22 @@ private func test(_ name: String, _ body: () throws -> Void)
     {
         failures += 1
         print("FAIL: \(name): \(error)")
+    }
+}
+
+for (index, item) in parserCases.enumerated()
+{
+    test("production kind parser: \(item.0)")
+    {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+        process.arguments = ["--parser-case", String(index)]
+        let output = Pipe()
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+        try process.run()
+        process.waitUntilExit()
+        try expect(process.terminationStatus, 0, "Parser must return the exact value or reject without trapping")
     }
 }
 
@@ -503,7 +549,16 @@ do
     let main = temporaryDirectory.appendingPathComponent("main.swift")
     let executable = temporaryDirectory.appendingPathComponent("buffer-tests")
     let productionDeclarations = source[start.lowerBound..<end.lowerBound]
-    try ("import Foundation\n" + productionDeclarations + tests).write(to: main, atomically: true, encoding: .utf8)
+    guard let parserStart = source.range(of: "    private func readInt(_ raw: Any?) -> Int?\n"),
+          let parserEnd = source.range(of: "    private func readInt(_ message: [String: Any], key: String) -> Int?\n") else
+    {
+        throw NSError(domain: "AppleWatchBufferTests", code: 1, userInfo: [
+            NSLocalizedDescriptionKey: "Production parser boundaries were not found"
+        ])
+    }
+    let parser = "private final class ProductionParser {\n" + source[parserStart.lowerBound..<parserEnd.lowerBound]
+        + "func parse(_ raw: Any?) -> Int? { readInt(raw) }\n}\n"
+    try ("import Foundation\n" + productionDeclarations + parser + tests).write(to: main, atomically: true, encoding: .utf8)
 
     let compileStatus = try run(URL(fileURLWithPath: "/usr/bin/xcrun"), [
         "--sdk", "macosx", "swiftc", "-warnings-as-errors", main.path, "-o", executable.path
