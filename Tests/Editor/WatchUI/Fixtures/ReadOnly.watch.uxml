@@ -1,0 +1,3 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:watch="WatchUI">
+    <watch:watch-text label="Read-only package source" />
+</ui:UXML>

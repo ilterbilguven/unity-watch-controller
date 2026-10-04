@@ -1,0 +1,6 @@
+{
+    "name": "AppleWatchController.Editor",
+    "rootNamespace": "AppleWatchController.Editor",
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true
+}

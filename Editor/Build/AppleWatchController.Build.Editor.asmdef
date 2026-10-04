@@ -1,0 +1,8 @@
+{
+    "name": "AppleWatchController.Build.Editor",
+    "rootNamespace": "AppleWatchController.Editor",
+    "references": ["AppleWatchController.Editor"],
+    "includePlatforms": ["Editor"],
+    "defineConstraints": ["UNITY_IOS"],
+    "autoReferenced": true
+}

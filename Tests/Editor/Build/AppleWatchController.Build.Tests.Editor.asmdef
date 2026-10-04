@@ -1,0 +1,8 @@
+{
+    "name": "AppleWatchController.Build.Tests.Editor",
+    "references": ["AppleWatchController.Editor", "AppleWatchController.Build.Editor"],
+    "includePlatforms": ["Editor"],
+    "defineConstraints": ["UNITY_IOS"],
+    "autoReferenced": false,
+    "optionalUnityReferences": ["TestAssemblies"]
+}

@@ -1,0 +1,432 @@
+import Foundation
+import CoreFoundation
+
+private enum RecordPermission { case granted, undetermined, denied }
+private final class AVAudioApplication {
+    static let shared = AVAudioApplication()
+    var recordPermission = RecordPermission.undetermined
+    static var pending: [(Bool) -> Void] = []
+    static func requestRecordPermission(_ callback: @escaping (Bool) -> Void) {
+        pending.append(callback)
+    }
+}
+
+private final class AVAudioSession {
+    enum Category { case playAndRecord }
+    static let shared = AVAudioSession()
+    static func sharedInstance() -> AVAudioSession { shared }
+    func setCategory(_ category: Category) throws {}
+    func setActive(_ active: Bool) throws {}
+}
+
+private let AVFormatIDKey = "format"
+private let AVSampleRateKey = "sampleRate"
+private let AVNumberOfChannelsKey = "channels"
+private let AVEncoderAudioQualityKey = "quality"
+private let kAudioFormatMPEG4AAC = 0
+private enum AVAudioQuality: Int { case medium }
+private final class FileManager {
+    static let `default` = FileManager()
+    let temporaryDirectory = URL(fileURLWithPath: "/watch-ui-test-recordings")
+    var files: Set<String> = []
+    func fileExists(atPath path: String) -> Bool { files.contains(path) }
+    func removeItem(at url: URL) throws { files.remove(url.path) }
+}
+private final class AVAudioRecorder {
+    static var instances: [AVAudioRecorder] = []
+    let url: URL
+    var isMeteringEnabled = false
+    var recording = false
+    init(url: URL, settings: [String: Any]) throws {
+        self.url = url
+        Self.instances.append(self)
+    }
+    @discardableResult func record() -> Bool {
+        recording = true
+        FileManager.default.files.insert(url.path)
+        return true
+    }
+    func stop() { recording = false }
+    func updateMeters() {}
+    func averagePower(forChannel channel: Int) -> Float { -30 }
+    func peakPower(forChannel channel: Int) -> Float { -10 }
+}
+
+private struct MotionVector { var x = 0.0; var y = 0.0; var z = 0.0 }
+private struct MotionQuaternion { var x = 0.0; var y = 0.0; var z = 0.0; var w = 1.0 }
+private struct MotionAttitude { var quaternion = MotionQuaternion() }
+private struct Motion {
+    var userAcceleration = MotionVector()
+    var rotationRate = MotionVector()
+    var attitude = MotionAttitude()
+    var timestamp: TimeInterval = 1
+}
+private final class CMMotionManager {
+    static var instances: [CMMotionManager] = []
+    enum ReferenceFrame { case xArbitraryCorrectedZVertical }
+    var isDeviceMotionAvailable = true
+    var isDeviceMotionActive = false
+    var deviceMotionUpdateInterval = 0.1
+    var deviceMotion: Motion?
+    var starts = 0
+    var stops = 0
+    init() { Self.instances.append(self) }
+    func startDeviceMotionUpdates(using frame: ReferenceFrame) { starts += 1; isDeviceMotionActive = true }
+    func stopDeviceMotionUpdates() { stops += 1; isDeviceMotionActive = false }
+}
+
+private final class WatchUiActionSink {
+    static let shared = WatchUiActionSink()
+    static var sampledSources: [String] = []
+    static var sampledPayloads: [[String: Any]] = []
+    static var sampledKinds: [String] = []
+    func send(action: String, sourceId: String, kind: String, payload: [String: Any]) {
+        Self.sampledSources.append(sourceId)
+        Self.sampledPayloads.append(payload)
+        Self.sampledKinds.append(kind)
+    }
+}
+
+@objc private enum WCSessionActivationState: Int { case notActivated, inactive, activated }
+@objc private protocol WCSessionDelegate: AnyObject {
+    @objc optional func session(_ session: WCSession, didFinish fileTransfer: WCSessionFileTransfer, error: Error?)
+    @objc optional func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?)
+}
+private final class WCSessionFile: NSObject {
+    let fileURL: URL
+    let metadata: [String: Any]?
+    init(url: URL, metadata: [String: Any]?) {
+        fileURL = url
+        self.metadata = metadata
+    }
+}
+private final class WCSessionFileTransfer: NSObject {
+    let file: WCSessionFile
+    init(file: WCSessionFile) { self.file = file }
+}
+private final class WCSession: NSObject {
+    static let `default` = WCSession()
+    weak var delegate: WCSessionDelegate?
+    var activationState = WCSessionActivationState.activated
+    var isReachable = true
+    var transfers: [WCSessionFileTransfer] = []
+    func activate() {}
+    func sendMessage(_ message: [String: Any], replyHandler: (([String: Any]) -> Void)?, errorHandler: ((Error) -> Void)?) {}
+    @discardableResult func transferFile(_ url: URL, metadata: [String: Any]?) -> WCSessionFileTransfer {
+        let transfer = WCSessionFileTransfer(file: WCSessionFile(url: url, metadata: metadata))
+        transfers.append(transfer)
+        return transfer
+    }
+    func complete(_ index: Int, error: Error? = nil) {
+        delegate?.session?(self, didFinish: transfers[index], error: error)
+    }
+    func finishActivation() {
+        activationState = .activated
+        delegate?.session?(self, activationDidCompleteWith: .activated, error: nil)
+    }
+}
+
+// GENERATED_CONNECTIVITY_SESSION
+
+private extension WatchConnectivitySession {
+    var transfers: [(URL, String)] {
+        WCSession.default.transfers.map { ($0.file.fileURL, $0.file.metadata?["source-id"] as? String ?? "") }
+    }
+}
+
+// GENERATED_SENSOR_BRIDGE
+
+private extension WatchSensorBridge {
+    func sampleForTest(sourceId: String) { emitMicrophoneFrame(sourceId: sourceId) }
+    func sampleMotionForTest(sourceId: String) { emitMotionFrame(sourceId: sourceId) }
+    func timersForTest() -> [Timer] { Array(activeMotionTimers.values) + Array(activeMicrophoneTimers.values) }
+    func motionTimersForTest() -> [Timer] { Array(activeMotionTimers.values) }
+    func microphoneTimersForTest() -> [Timer] { Array(activeMicrophoneTimers.values) }
+}
+
+private func startAttitudeMotionForTest(sourceId: String) {
+    // GENERATED_START_ATTITUDE_MOTION
+}
+
+private struct SwipeSample { let translation: CGSize; let location: CGPoint }
+private func swipeForTest(_ horizontal: Double, _ vertical: Double) {
+    let value = SwipeSample(translation: CGSize(width: CGFloat(horizontal), height: CGFloat(vertical)), location: CGPoint(x: 40, y: 30))
+    // GENERATED_SWIPE_RELEASE
+}
+
+private func require(_ condition: @autoclosure () -> Bool, _ message: String) {
+    if !condition() {
+        print("FAIL: " + message)
+        exit(1)
+    }
+}
+
+private func grantPermission(_ index: Int) {
+    AVAudioApplication.pending[index](true)
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+}
+
+private let scenario = CommandLine.arguments[1]
+private let bridge = WatchSensorBridge.shared
+private let sourceA = "test-a-" + UUID().uuidString
+private let sourceB = "test-b-" + UUID().uuidString
+if scenario != "initially-inactive" {
+    bridge.setSceneActive(true)
+}
+defer {
+    for recorder in AVAudioRecorder.instances {
+        try? FileManager.default.removeItem(at: recorder.url)
+    }
+}
+
+switch scenario {
+case "swipe-directions":
+    let samples: [(Double, Double, String, String)] = [
+        (-32, 0, "left", "swipeLeft"), (32, 0, "right", "swipeRight"),
+        (0, -32, "up", "swipeUp"), (0, 32, "down", "swipeDown"),
+        (-40, 32, "left", "swipeLeft"), (32, -40, "up", "swipeUp"),
+        (32, 32, "right", "swipeRight"), (-32, -32, "left", "swipeLeft"),
+        (31, 31, "", ""), (0, 0, "", ""), (3, 0, "", "")
+    ]
+    for (x, y, direction, pulse) in samples {
+        let before = WatchUiActionSink.sampledKinds.count
+        swipeForTest(x, y)
+        require(WatchUiActionSink.sampledKinds.count == before + (direction.isEmpty ? 0 : 1), "one release must emit exactly one direction or none below threshold")
+        if !direction.isEmpty {
+            require(WatchUiActionSink.sampledKinds.last == "WatchGestureArea/swipe-" + direction, "native classification must use dominant axis and horizontal ties")
+            require(WatchUiActionSink.sampledPayloads.last?[pulse] as? Int == 1, "the existing directional pulse must be preserved")
+        }
+    }
+case "motion-attitude":
+    startAttitudeMotionForTest(sourceId: sourceA)
+    let manager = CMMotionManager.instances[0]
+    manager.deviceMotion = Motion(userAcceleration: MotionVector(x: 1, y: 2, z: 3),
+        rotationRate: MotionVector(x: 4, y: 5, z: 6),
+        attitude: MotionAttitude(quaternion: MotionQuaternion(x: 0.1, y: 0.2, z: 0.3, w: 0.9)), timestamp: 10)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    let payload = WatchUiActionSink.sampledPayloads.last!
+    require(payload["attitude"] as? [Float] == [0.1, 0.2, 0.3, 0.9], "attitude must preserve raw CoreMotion x/y/z/w without calibration or axis conversion")
+    require((payload["attitudeReference"] as? UInt32 ?? 0) > 0, "valid attitude needs a nonzero UInt32 reference epoch")
+    require(payload["acceleration"] as? [Float] == [1, 2, 3], "attitude must not replace acceleration")
+    require(payload["gyro"] as? [Float] == [4, 5, 6], "attitude must not replace gyro")
+    require(payload["motionSampleInterval"] as? Float == 0, "the first sample cannot claim a measured cadence")
+case "motion-sample-dedup":
+    bridge.startMotion(sourceId: sourceA, action: "a", interval: 0.05, includeAcceleration: true, includeGyro: false)
+    let manager = CMMotionManager.instances[0]
+    manager.deviceMotion = Motion(timestamp: 10)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 1, "a timer tick must not replay the same CoreMotion sample")
+    require(WatchUiActionSink.sampledPayloads[0]["attitude"] == nil, "attitude must remain opt-in")
+    manager.deviceMotion?.timestamp = 10.075
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 2, "a newer sample must be accepted")
+    require(abs((WatchUiActionSink.sampledPayloads.last?["motionSampleInterval"] as? Float ?? 0) - 0.075) < 0.00001,
+        "cadence must use CoreMotion timestamps, not the configured 0.05s timer interval")
+    manager.deviceMotion?.timestamp = 9
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    manager.deviceMotion?.timestamp = .nan
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 2, "old/nonfinite timestamps must not produce a false cadence")
+    bridge.stopMotion(sourceId: sourceA)
+    bridge.startMotion(sourceId: sourceA, action: "a", interval: 0.05, includeAcceleration: true, includeGyro: false)
+    manager.deviceMotion?.timestamp = 10.1
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 3, "restart must reset per-source deduplication")
+    require(WatchUiActionSink.sampledPayloads.last?["motionSampleInterval"] as? Float == 0, "restart's first sample has no measured interval")
+case "motion-shared-rate":
+    bridge.startMotion(sourceId: sourceA, action: "slow", interval: 0.2, includeAcceleration: true, includeGyro: false)
+    let manager = CMMotionManager.instances[0]
+    bridge.startMotion(sourceId: sourceB, action: "fast", interval: 0.05, includeAcceleration: false, includeGyro: true)
+    require(manager.deviceMotionUpdateInterval == 0.05, "the fastest active consumer must set the manager rate")
+    require(manager.starts == 1, "adding a faster consumer must not restart the shared reference frame")
+    bridge.stopMotion(sourceId: sourceB)
+    require(manager.deviceMotionUpdateInterval == 0.2 && manager.isDeviceMotionActive, "stopping the fast consumer must retain the slower consumer at its rate")
+    bridge.stopMotion(sourceId: sourceA)
+    require(!manager.isDeviceMotionActive && manager.stops == 1, "the final consumer must stop the manager once")
+case "motion-reference-epochs":
+    startAttitudeMotionForTest(sourceId: sourceA)
+    let manager = CMMotionManager.instances[0]
+    manager.deviceMotion = Motion(timestamp: 1)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    let firstEpoch = WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 ?? 0
+    require(firstEpoch > 0, "the first manager session must have a reference epoch")
+    startAttitudeMotionForTest(sourceId: sourceB)
+    bridge.sampleMotionForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 == firstEpoch, "concurrent sources must share the manager's reference")
+    bridge.stopMotion(sourceId: sourceA)
+    manager.deviceMotion?.timestamp = 1.05
+    bridge.sampleMotionForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 == firstEpoch, "a new packet or one source stopping must not advance the reference")
+    bridge.setSceneActive(false)
+    bridge.setSceneActive(true)
+    startAttitudeMotionForTest(sourceId: sourceA)
+    manager.deviceMotion?.timestamp = 1.1
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    let restartedEpoch = WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 ?? 0
+    require(restartedEpoch > 0 && restartedEpoch != firstEpoch, "only a new manager start may advance the nonzero reference")
+    let accepted = WatchUiActionSink.sampledPayloads.count
+    bridge.sampleMotionForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledPayloads.count == accepted, "an old source must stay stopped after scene return")
+case "motion-restart-freshness":
+    startAttitudeMotionForTest(sourceId: sourceA)
+    let manager = CMMotionManager.instances[0]
+    manager.deviceMotion = Motion(timestamp: 100)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    let originalEpoch = WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 ?? 0
+    bridge.stopMotion(sourceId: sourceA)
+    startAttitudeMotionForTest(sourceId: sourceA)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 1, "a retained old-session sample must not be relabeled with the new reference epoch")
+    manager.deviceMotion?.timestamp = 100.05
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    require(WatchUiActionSink.sampledPayloads.count == 2, "the first fresh sample after restart must be accepted")
+    let freshEpoch = WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 ?? 0
+    require(freshEpoch > 0 && freshEpoch != originalEpoch, "the fresh sample must use the new manager epoch")
+    require(WatchUiActionSink.sampledPayloads.last?["motionSampleInterval"] as? Float == 0, "restart cannot derive cadence from the previous session")
+    startAttitudeMotionForTest(sourceId: sourceB)
+    bridge.sampleMotionForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledPayloads.count == 3, "joining an active shared manager must accept its current sample")
+    require(WatchUiActionSink.sampledPayloads.last?["attitudeReference"] as? UInt32 == freshEpoch, "joining must preserve the shared reference epoch")
+case "motion-common-mode":
+    bridge.startMotion(sourceId: sourceA, action: "a", interval: 2, includeAcceleration: true, includeGyro: true)
+    require(bridge.motionTimersForTest().allSatisfy {
+        CFRunLoopContainsTimer(CFRunLoopGetMain(), unsafeBitCast($0, to: CFRunLoopTimer.self), CFRunLoopMode.commonModes)
+    }, "motion timers must remain scheduled during UI tracking through common run-loop modes")
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceB, action: "b", interval: 2)
+    require(bridge.microphoneTimersForTest().allSatisfy {
+        !CFRunLoopContainsTimer(CFRunLoopGetMain(), unsafeBitCast($0, to: CFRunLoopTimer.self), CFRunLoopMode.commonModes)
+    }, "motion timing changes must not change microphone timer behavior")
+case "recording-paths":
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "first", interval: 2)
+    bridge.stopAndTransferMicrophone(sourceId: sourceA)
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "second", interval: 2)
+    bridge.stopAndTransferMicrophone(sourceId: sourceA)
+    let transfers = WatchConnectivitySession.shared.transfers
+    require(transfers.count == 2, "both recordings should be queued for transfer")
+    require(transfers[0].0 != transfers[1].0, "a new recording must not overwrite a file still queued for transfer")
+    require(transfers.allSatisfy { $0.1 == sourceA }, "unique filenames must preserve the authored source-id metadata")
+    require(FileManager.default.files.count == 2, "both pending recordings must remain until their transfers finish")
+case "transfer-cleanup":
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "first", interval: 2)
+    bridge.stopAndTransferMicrophone(sourceId: sourceA)
+    bridge.requestAndStartMicrophone(sourceId: sourceB, action: "second", interval: 2)
+    bridge.stopAndTransferMicrophone(sourceId: sourceB)
+    let transfers = WatchConnectivitySession.shared.transfers
+    WCSession.default.complete(0)
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(!FileManager.default.fileExists(atPath: transfers[0].0.path), "successful transfer completion must remove its owned recording")
+    require(FileManager.default.fileExists(atPath: transfers[1].0.path), "completion must not delete a different pending recording")
+    WCSession.default.complete(1, error: NSError(domain: "test", code: 1))
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(FileManager.default.fileExists(atPath: transfers[1].0.path), "failed transfer completion must preserve its owned recording")
+    require(WCSession.default.transfers.count == 2, "a failed transfer must not trigger an immediate retry loop")
+    WCSession.default.finishActivation()
+    WCSession.default.finishActivation()
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(WCSession.default.transfers.count == 3, "reactivation should retry a retained recording once without duplicating in-flight work")
+    let retried = WatchConnectivitySession.shared.transfers[2]
+    require(retried.0 == transfers[1].0 && retried.1 == sourceB, "retry must preserve the recording URL and source metadata")
+    WCSession.default.complete(2)
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(!FileManager.default.fileExists(atPath: transfers[1].0.path), "a successful retry may clean up the retained recording")
+    let unrelated = URL(fileURLWithPath: "/unrelated-transfer.caf")
+    FileManager.default.files.insert(unrelated.path)
+    WCSession.default.transferFile(unrelated, metadata: nil)
+    WCSession.default.complete(3)
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(FileManager.default.fileExists(atPath: unrelated.path), "the delegate must not remove files it did not queue as recordings")
+case "unavailable-transfer":
+    _ = WatchConnectivitySession.shared
+    WCSession.default.activationState = .inactive
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.stopAndTransferMicrophone(sourceId: sourceA)
+    require(WCSession.default.transfers.isEmpty, "an inactive session must not queue a recording")
+    require(FileManager.default.fileExists(atPath: AVAudioRecorder.instances[0].url.path), "an unsubmitted recording must be retained")
+    WCSession.default.finishActivation()
+    WCSession.default.finishActivation()
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(WCSession.default.transfers.count == 1, "activation should submit the retained recording exactly once")
+    let transfer = WatchConnectivitySession.shared.transfers[0]
+    require(transfer.0 == AVAudioRecorder.instances[0].url && transfer.1 == sourceA, "activation must preserve the unsubmitted file and source metadata")
+    require(FileManager.default.fileExists(atPath: transfer.0.path), "an in-flight recording must remain available")
+    WCSession.default.complete(0)
+    RunLoop.current.run(until: Date().addingTimeInterval(0.02))
+    require(!FileManager.default.fileExists(atPath: transfer.0.path), "only successful completion may delete the retained file")
+case "initially-inactive":
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.startMotion(sourceId: sourceB, action: "motion", interval: 2, includeAcceleration: true, includeGyro: true)
+    require(AVAudioRecorder.instances.isEmpty, "the microphone must not start before the scene becomes active")
+    require(!CMMotionManager.instances.contains { $0.isDeviceMotionActive }, "motion must not start before the scene becomes active")
+case "inactive-stops-providers":
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.startMotion(sourceId: sourceA, action: "motion-a", interval: 2, includeAcceleration: true, includeGyro: false)
+    bridge.startMotion(sourceId: sourceB, action: "motion-b", interval: 2, includeAcceleration: false, includeGyro: true)
+    let activeTimers = bridge.timersForTest()
+    require(activeTimers.count == 3 && activeTimers.allSatisfy { $0.isValid }, "the active fixture must have both motion timers and the microphone timer")
+    bridge.setSceneActive(false)
+    require(!AVAudioRecorder.instances[0].recording, "leaving the active scene must stop recording")
+    require(!CMMotionManager.instances.contains { $0.isDeviceMotionActive }, "leaving the active scene must stop motion")
+    require(activeTimers.allSatisfy { !$0.isValid } && bridge.timersForTest().isEmpty, "leaving the active scene must invalidate and release all provider timers")
+    bridge.sampleForTest(sourceId: sourceA)
+    bridge.sampleMotionForTest(sourceId: sourceA)
+    bridge.sampleMotionForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledSources.isEmpty, "inactive providers must not send more samples")
+    require(WatchConnectivitySession.shared.transfers.isEmpty, "backgrounding must discard rather than transfer an unfinished recording")
+    bridge.setSceneActive(true)
+    require(!AVAudioRecorder.instances[0].recording && bridge.timersForTest().isEmpty, "returning to the active scene must not resume providers automatically")
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "restart", interval: 2)
+    bridge.startMotion(sourceId: sourceB, action: "restart", interval: 2, includeAcceleration: true, includeGyro: false)
+    require(AVAudioRecorder.instances.count == 2 && AVAudioRecorder.instances[1].recording, "an explicit microphone restart after reactivation must work")
+    require(CMMotionManager.instances.contains { $0.isDeviceMotionActive }, "an explicit motion restart after reactivation must work")
+    bridge.setSceneActive(false)
+case "permission-after-scene-return":
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.setSceneActive(false)
+    bridge.setSceneActive(true)
+    grantPermission(0)
+    require(AVAudioRecorder.instances.isEmpty, "a permission callback from before suspension must not restart recording after scene reactivation")
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "restart", interval: 2)
+    grantPermission(1)
+    require(AVAudioRecorder.instances.count == 1 && AVAudioRecorder.instances[0].recording, "a new explicit request after reactivation may start recording")
+    bridge.setSceneActive(false)
+case "permission-after-stop":
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.stopMicrophone(sourceId: sourceA)
+    grantPermission(0)
+    require(AVAudioRecorder.instances.isEmpty, "a dismissed microphone must not start after permission returns")
+case "permission-after-replacement":
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "old", interval: 2)
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "new", interval: 2)
+    grantPermission(0)
+    require(AVAudioRecorder.instances.isEmpty, "an obsolete request for the same source must not start recording")
+    grantPermission(1)
+    require(AVAudioRecorder.instances.count == 1, "only the latest request may create a recorder")
+    bridge.stopMicrophone(sourceId: sourceA)
+case "single-owner":
+    AVAudioApplication.shared.recordPermission = .granted
+    bridge.requestAndStartMicrophone(sourceId: sourceA, action: "a", interval: 2)
+    bridge.requestAndStartMicrophone(sourceId: sourceB, action: "b", interval: 2)
+    require(AVAudioRecorder.instances.count == 2, "switching microphone ownership should start the new source")
+    require(!AVAudioRecorder.instances[0].recording, "the previous owner's recorder must be stopped")
+    require(AVAudioRecorder.instances[1].recording, "the latest owner must remain recording")
+    bridge.sampleForTest(sourceId: sourceA)
+    bridge.sampleForTest(sourceId: sourceB)
+    require(WatchUiActionSink.sampledSources == [sourceB], "an old source must not meter the new owner's recorder")
+    bridge.stopAndTransferMicrophone(sourceId: sourceA)
+    require(WatchConnectivitySession.shared.transfers.isEmpty, "an old source must not transfer the new owner's file")
+    require(AVAudioRecorder.instances[1].recording, "an old source stop must not stop the new owner")
+    bridge.stopAndTransferMicrophone(sourceId: sourceB)
+    require(WatchConnectivitySession.shared.transfers.count == 1, "the current owner should transfer once")
+    require(WatchConnectivitySession.shared.transfers[0].1 == sourceB, "the transfer metadata must identify the owner")
+    require(WatchConnectivitySession.shared.transfers[0].0 == AVAudioRecorder.instances[1].url, "the transferred file must belong to the owner")
+default:
+    fatalError("Unknown scenario")
+}
+print("PASS: " + scenario)

@@ -1,0 +1,7 @@
+{
+    "name": "AppleWatchController.WatchUI.Tests.Editor",
+    "references": ["AppleWatchController.Editor"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": false,
+    "optionalUnityReferences": ["TestAssemblies"]
+}
