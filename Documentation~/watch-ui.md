@@ -20,7 +20,7 @@ Create `Assets/TutorialController.watch.uxml` and paste this complete example. T
 </ui:UXML>
 ```
 
-`watch-id` identifies a control in generated metadata; keep it unique and stable. `spacing` controls gaps between stack children. `dead-zone` ignores small joystick movement around its center. `spring-return` returns the joystick to zero on release. `action` is metadata, not a C# method name or a new Input System control. A button feeds `primaryButton` and a joystick feeds `primaryStick` through the fixed input contract.
+`watch-id` identifies a control in generated metadata; keep it unique and stable. `spacing` controls gaps between stack children. Joystick `dead-zone` sets the minimum drag-recognition distance in points, not a normalized Input System dead-zone. `spring-return` returns the joystick to zero on release. `action` is metadata, not a C# method name or a new Input System control. A button feeds `primaryButton` and a joystick feeds `primaryStick` through the fixed input contract.
 
 Select the source in the Project window. Choose **Tools > AppleWatch > Preview Selected Watch UI**. Check the label, joystick, and button at Watch size. Preview interactions are local UI feedback; they do not send messages to a phone or drive your game. Native SwiftUI has different fonts and insets, so inspect the native screen separately.
 
