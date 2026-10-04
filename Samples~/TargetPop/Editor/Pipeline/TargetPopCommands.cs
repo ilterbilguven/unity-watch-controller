@@ -10,8 +10,10 @@ namespace AppleWatchController.Samples.TargetPop.Pipeline.Editor
         public static object Create(
             [CliArg("sample_root", "Imported Target Pop folder under Assets.", Required = true)] string sampleRoot,
             [CliArg("scene_path", "New scene under Assets. Existing scenes are opened, never overwritten.")] string scenePath = TargetPopSampleSetup.ScenePath,
-            [CliArg("make_startup_scene", "Place this scene first in build settings.")] bool makeStartupScene = false)
-            => TargetPopSampleSetup.Create(sampleRoot, scenePath, makeStartupScene);
+            [CliArg("make_startup_scene", "Place this scene first in build settings.")] bool makeStartupScene = false,
+            [CliArg("watch_ui_path", "Explicit authored Assets .watch.uxml source; omitted selects imported Watch Lab by its GUID.")] string watchUiPath = null)
+            => string.IsNullOrWhiteSpace(watchUiPath) ? TargetPopSampleSetup.Create(sampleRoot, scenePath, makeStartupScene)
+                : TargetPopSampleSetup.CreateWithWatchSource(sampleRoot, scenePath, watchUiPath, makeStartupScene);
 
         [CliCommand("watch_demo_state", "Read the active game's score, input values and sound state.", MainThreadRequired = true)]
         public static object State() => AppleWatchDemoProbe.State();

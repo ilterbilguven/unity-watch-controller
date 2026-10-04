@@ -20,18 +20,20 @@ namespace AppleWatchController.Samples.TargetPop.Editor
     {
         /// <summary>The default Assets-relative path of the demo scene.</summary>
         public const string ScenePath = "Assets/Scenes/WatchControllerDemo.unity";
-
+        private const string WatchLabSourceGuid = "7098a3545738473ab6dc4dda4be2cf43";
 
         [MenuItem("Tools/AppleWatch/Open Game Demo")]
         private static void OpenFromMenu()
         {
             var selected = EditorUtility.OpenFolderPanel("Select imported Target Pop folder", "Assets", "");
             if (string.IsNullOrEmpty(selected)) return;
-            Create(FileUtil.GetProjectRelativePath(selected), ScenePath);
+            var source = EditorUtility.OpenFilePanel("Select authored Watch controller (.watch.uxml)", "Assets", "uxml");
+            if (string.IsNullOrEmpty(source)) return;
+            CreateWithWatchSource(FileUtil.GetProjectRelativePath(selected), ScenePath, FileUtil.GetProjectRelativePath(source));
         }
 
         /// <summary>Opens an existing scene or creates and saves a new demo with its supporting assets.</summary>
-        /// <param name="sampleRoot">The explicit imported Target Pop folder under Assets, with Watch Lab beside it.</param>
+        /// <param name="sampleRoot">The explicit imported Target Pop folder under Assets.</param>
         /// <param name="scenePath">A non-null Assets-relative .unity path with no parent-directory segments.</param>
         /// <param name="makeStartupScene">Whether to place this scene first and enabled in build settings while retaining other scenes.</param>
         /// <returns>Status and ScenePath fields; a newly created scene also reports its target count.</returns>
@@ -42,10 +44,24 @@ namespace AppleWatchController.Samples.TargetPop.Editor
         /// Creation writes a sibling scene-assets folder with materials, font data, text settings, and panel settings.
         /// It saves assets and the scene, selects the demo root, and can change build settings.
         /// Reusing an existing scene does not check that it contains the expected demo components.
+        /// Resolves the imported Watch Lab source by its preserved asset GUID, independent of its folder or sample version.
+        /// Other authored Watch sources do not affect that selection. Use CreateWithWatchSource to choose another source.
         /// </remarks>
         /// <exception cref="ArgumentException">The path is not an Assets-relative .unity path or contains '..'.</exception>
         /// <exception cref="InvalidOperationException">Play Mode is active or changing, a scene is dirty, or required demo resources are unavailable.</exception>
         public static object Create(string sampleRoot, string scenePath, bool makeStartupScene = false)
+            => CreateWithWatchSource(sampleRoot, scenePath, AssetDatabase.GUIDToAssetPath(WatchLabSourceGuid), makeStartupScene);
+
+        /// <summary>Creates or opens Target Pop with an explicitly selected authored Watch source.</summary>
+        /// <param name="sampleRoot">The explicit imported Target Pop folder under Assets.</param>
+        /// <param name="scenePath">An Assets-relative .unity path; existing scenes are opened without overwriting them.</param>
+        /// <param name="watchUiPath">An existing Assets-relative .watch.uxml source, independent of the sample folders.</param>
+        /// <param name="makeStartupScene">Whether to explicitly place this scene first in build settings.</param>
+        /// <returns>The same status/scene result as Create.</returns>
+        /// <remarks>Requires a configured URP project and clean scenes. Validates the source before writing any scene or assets.</remarks>
+        /// <exception cref="ArgumentException">The sample root or scene path is invalid.</exception>
+        /// <exception cref="InvalidOperationException">Play Mode, dirty scenes, missing URP, or an invalid/missing Watch source prevents setup.</exception>
+        public static object CreateWithWatchSource(string sampleRoot, string scenePath, string watchUiPath, bool makeStartupScene = false)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode)
                 throw new InvalidOperationException("Stop Play Mode before creating or opening the demo.");
@@ -59,9 +75,7 @@ namespace AppleWatchController.Samples.TargetPop.Editor
                 || !scenePath.EndsWith(".unity", StringComparison.OrdinalIgnoreCase))
                 throw new ArgumentException("Use an Assets-relative .unity scene path.");
             RequireUrp();
-            var watchLab = sampleRoot + "/../Watch Lab/WatchControllerSample.watch.uxml";
-            if (!File.Exists(Path.GetFullPath(watchLab)))
-                throw new InvalidOperationException("Import Watch Lab beside Target Pop to supply the authored Watch controller source.");
+            ValidateWatchSource(watchUiPath);
             if (File.Exists(scenePath))
             {
                 EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
@@ -241,6 +255,15 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             if (!File.Exists(sampleRoot + "/Runtime/AppleWatchDemoGame.cs"))
                 throw new ArgumentException("The selected folder is not the imported Target Pop sample.");
             return sampleRoot;
+        }
+
+        private static void ValidateWatchSource(string path)
+        {
+            path = path?.Replace('\\', '/');
+            if (string.IsNullOrWhiteSpace(path) || !path.StartsWith("Assets/", StringComparison.Ordinal) || path.Contains("..")
+                || !path.EndsWith(".watch.uxml", StringComparison.OrdinalIgnoreCase) || !File.Exists(path)
+                || AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(path) == null)
+                throw new InvalidOperationException("Import Watch Lab or explicitly select an existing authored .watch.uxml source under Assets. Sample folders need not be adjacent.");
         }
 
         private static void RequireUrp()

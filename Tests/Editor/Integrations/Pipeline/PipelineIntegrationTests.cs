@@ -73,7 +73,7 @@ public sealed class PipelineIntegrationTests
     [Test]
     public void TargetPopCommandsPreserveNamesAndRequireExplicitSampleRoot()
     {
-        CheckCommand("watch_demo_create", "AppleWatchController.Samples.TargetPop.Pipeline.Editor", "sample_root", "scene_path", "make_startup_scene");
+        CheckCommand("watch_demo_create", "AppleWatchController.Samples.TargetPop.Pipeline.Editor", "sample_root", "scene_path", "make_startup_scene", "watch_ui_path");
         Assert.That(FindCommand("watch_demo_create").Method.GetParameters()[2].DefaultValue, Is.EqualTo(false));
         foreach (var name in new[] { "watch_demo_state", "watch_demo_pose", "watch_demo_simulate", "watch_demo_ui", "watch_demo_capture" })
         {
