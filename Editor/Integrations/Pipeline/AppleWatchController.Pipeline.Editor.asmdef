@@ -1,0 +1,15 @@
+{
+    "name": "AppleWatchController.Pipeline.Editor",
+    "rootNamespace": "AppleWatchController.Editor",
+    "references": ["AppleWatchController.Editor", "Unity.Pipeline"],
+    "includePlatforms": ["Editor"],
+    "autoReferenced": true,
+    "defineConstraints": ["WATCH_CONTROLLER_PIPELINE"],
+    "versionDefines": [
+        {
+            "name": "com.unity.pipeline",
+            "expression": "[0.7.0-exp.1,0.8.0-exp.1)",
+            "define": "WATCH_CONTROLLER_PIPELINE"
+        }
+    ]
+}
