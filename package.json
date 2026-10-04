@@ -1,0 +1,12 @@
+{
+  "name": "com.ilter.apple-watch-controller",
+  "version": "0.1.0-preview.1",
+  "displayName": "Apple Watch Controller",
+  "description": "Apple Watch input for Unity through a custom Input System device and a Swift WatchConnectivity bridge.",
+  "unity": "6000.7",
+  "unityRelease": "0b2",
+  "license": "MIT",
+  "dependencies": {
+    "com.unity.inputsystem": "6.7.0"
+  }
+}
