@@ -6,6 +6,12 @@
   "unity": "6000.7",
   "unityRelease": "0b2",
   "license": "MIT",
+  "documentationUrl": "https://github.com/ilterbilguven/unity-watch-controller/blob/main/Documentation~/index.md",
+  "changelogUrl": "https://github.com/ilterbilguven/unity-watch-controller/blob/main/CHANGELOG.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ilterbilguven/unity-watch-controller.git"
+  },
   "samples": [
     { "displayName": "Basic Controller", "description": "A small controller scene for URP.", "path": "Samples~/BasicController" },
     { "displayName": "Watch Lab", "description": "The source-authored Watch component gallery.", "path": "Samples~/WatchLab" },

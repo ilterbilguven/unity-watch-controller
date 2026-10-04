@@ -1,6 +1,6 @@
 # Optional Unity CLI wrappers
 
-The package's Editor menus and services work without Unity Pipeline. These Bash wrappers require `jq`, the Unity CLI, and a ready Editor for your consumer project with `com.unity.pipeline` in `[0.7.0-exp.1,0.8.0-exp.1)`.
+Start with the [Editor-first installation guide](../Documentation~/installation.md). The package requires Universal Render Pipeline (URP) 17.7.0. Its Editor menus and services work without the separate Unity Pipeline CLI integration. These optional Bash wrappers require `jq`, the Unity CLI, and a ready Editor for your consumer project with `com.unity.pipeline` in `[0.7.0-exp.1,0.8.0-exp.1)`.
 
 Use the registered command directly, with the consumer project explicitly selected:
 
@@ -16,7 +16,7 @@ bash /physical/package/root/Tools/export-watch-ui.sh Assets/Controller.watch.uxm
 
 Unity's `Packages/com.ilter.apple-watch-controller` asset path is virtual for Git and registry installs. It is not always a shell directory. The wrappers never infer the consumer project from their own directory or select an unrelated Editor.
 
-Arguments are the `.watch.uxml` source path, required consumer project path, optional Unity CLI executable, a retained legacy format argument, and optional timeout in seconds. Responses always use JSON. The default executable is `$HOME/.unity/bin/unity`; the default timeout is 30 seconds. `UNITY_CLI` and `UNITY_TIMEOUT` can override those defaults. `WATCH_UI_AUTO_OPEN_EDITOR=true` allows the wrapper to open the exact consumer project and wait up to `WATCH_UI_EDITOR_WAIT_SECONDS` (default 20) for its Pipeline server.
+Arguments are the `.watch.uxml` source path, required consumer project path, optional Unity CLI executable, a retained legacy format argument, and optional timeout in seconds. Responses always use JSON. By default the wrapper uses the Unity CLI's standard per-user installation; pass its executable path when installed elsewhere. The default timeout is 30 seconds. `UNITY_CLI` and `UNITY_TIMEOUT` can override those defaults. `WATCH_UI_AUTO_OPEN_EDITOR=true` allows the wrapper to open the exact consumer project and wait up to `WATCH_UI_EDITOR_WAIT_SECONDS` (default 20) for its Pipeline server. An outer timeout does not extend the exporter's native compiler deadline; see [timeout diagnostics](../Documentation~/troubleshooting.md#swift-export-fails-or-times-out).
 
 The source must be inside the consumer's `Assets` directory. The wrapper rejects the wrong Editor, failed responses, missing output paths, malformed JSON, and missing generated files. It prints `OUTPUT_PATH` only after export succeeds. `watch-ui-pipeline.sh` accepts the same arguments.
 
