@@ -17,6 +17,7 @@ namespace AppleWatchController.Editor
     /// <remarks>The menu and CLI use this same export path. Generated Swift is output; edit the UXML, USS, or generator instead.</remarks>
     public static class WatchUiExportMenu
     {
+        private const int NativeSwiftCompileTimeoutSeconds = 300;
         private static readonly SemaphoreSlim ExportGate = new SemaphoreSlim(1, 1);
 
         [MenuItem("Tools/AppleWatch/Configure iOS Export")]
@@ -350,7 +351,7 @@ namespace AppleWatchController.Editor
                 process.Start();
                 var stdoutTask = process.StandardOutput.ReadToEndAsync();
                 var stderrTask = process.StandardError.ReadToEndAsync();
-                var deadline = DateTime.UtcNow.AddSeconds(30);
+                var deadline = DateTime.UtcNow.AddSeconds(NativeSwiftCompileTimeoutSeconds);
                 while (!process.HasExited && DateTime.UtcNow < deadline)
                     await Task.Delay(50);
                 if (!process.HasExited)

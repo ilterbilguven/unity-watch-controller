@@ -4,7 +4,7 @@ set -euo pipefail
 WATCH_UI_PATH="${1:-}"
 PROJECT_ROOT="${2:-}"
 UNITY_CLI="${3:-${UNITY_CLI:-$HOME/.unity/bin/unity}}"
-UNITY_TIMEOUT="${5:-${UNITY_TIMEOUT:-30}}"
+UNITY_TIMEOUT="${5:-${UNITY_TIMEOUT:-330}}"
 
 fail() { echo "$*" >&2; exit 1; }
 [[ "$WATCH_UI_PATH" == *.watch.uxml ]] || fail 'Input path must end with .watch.uxml'

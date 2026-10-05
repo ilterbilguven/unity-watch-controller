@@ -306,7 +306,7 @@ public sealed class WatchUiExportPathTests
 
     private static IEnumerator AwaitTask(Task task)
     {
-        var deadline = EditorApplication.timeSinceStartup + 60;
+        var deadline = EditorApplication.timeSinceStartup + 330;
         while (!task.IsCompleted && EditorApplication.timeSinceStartup < deadline)
             yield return null;
         Assert.That(task.IsCompleted, Is.True, "Panel-backed operation timed out without blocking the Editor.");

@@ -14,7 +14,7 @@ If Target Pop cannot find Watch Lab, select the imported source explicitly throu
 
 ## Swift export fails or times out
 
-An export can report **"watchOS Swift compilation timed out."** after the native compiler's 30-second deadline. The cause of intermittent timeouts is not established. More time on an outer CLI request does not extend this internal deadline, and an idle Editor is not a proven fix.
+Larger WatchUI sources can compile slowly. The exporter gives the native watchOS compiler 300 seconds. It reports **"watchOS Swift compilation timed out."** if that finite budget expires and preserves the previous output. The CLI wrapper defaults to a separate 330-second outer request timeout. Its fifth argument or `UNITY_TIMEOUT` overrides the outer timeout only; neither extends the native compiler budget. These budgets do not establish the cause of every hang or intermittent timeout.
 
 The error **"Generated Swift syntax validation failed; previous output was preserved"** means the failed validation did not replace the previous file. That previous file is not proof of a fresh export. Keep the error, verify your Xcode command-line tools and watchOS SDK, inspect the source and conversion diagnostics, then retry once. If it repeats, report the smallest source that reproduces it, Unity/Xcode versions, and compiler diagnostics. Do not disable validation or edit an old generated file to bypass the failure.
 
