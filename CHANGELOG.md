@@ -2,7 +2,7 @@
 
 ## 0.1.0-preview.1
 
-Initial preview package. Publication is pending.
+Initial preview package.
 
 ### Added
 
