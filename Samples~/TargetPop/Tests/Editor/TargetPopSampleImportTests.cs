@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
@@ -6,6 +7,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
 using UnityEngine.UIElements;
 using AppleWatchController.Samples.TargetPop.Editor;
 
@@ -13,9 +15,12 @@ using AppleWatchController.Samples.TargetPop.Editor;
 public sealed class TargetPopSampleImportTests
 {
     private readonly string sampleRoot;
-    private SceneSetup[] originalScenes;
-    private EditorBuildSettingsScene[] beforeScenes;
+    [SerializeField] private SceneSetup[] originalScenes;
+    [SerializeField] private EditorBuildSettingsScene[] beforeScenes;
+    [SerializeField] private bool relocationFolderCreated;
     private const string ScenePath = "Assets/Task4TargetTests/Demo.unity";
+    private const string RelocatedFolder = "Assets/Samples/Apple Watch Controller/Relocated";
+    private const string RelocatedSampleRoot = RelocatedFolder + "/Target Pop";
     public TargetPopSampleImportTests(string sampleRoot) => this.sampleRoot = sampleRoot;
 
     [SetUp]
@@ -26,11 +31,21 @@ public sealed class TargetPopSampleImportTests
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
     }
 
-    [TearDown]
-    public void TearDown()
+    [UnityTearDown]
+    public IEnumerator TearDown()
     {
         EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
         AssetDatabase.DeleteAsset("Assets/Task4TargetTests");
+        if (relocationFolderCreated)
+        {
+            if (AssetDatabase.IsValidFolder(RelocatedSampleRoot))
+            {
+                Assert.That(AssetDatabase.MoveAsset(RelocatedSampleRoot, sampleRoot), Is.Empty);
+                yield return new RecompileScripts();
+            }
+            Assert.That(AssetDatabase.DeleteAsset(RelocatedFolder), Is.True);
+            relocationFolderCreated = false;
+        }
         if (originalScenes.Length > 0 && originalScenes.All(s => !string.IsNullOrEmpty(s.path))) EditorSceneManager.RestoreSceneManagerSetup(originalScenes);
     }
 
@@ -106,28 +121,22 @@ public sealed class TargetPopSampleImportTests
         }
     }
 
-    [Test]
-    public void RelocatedTargetPopFindsHudAndFont()
+    [UnityTest]
+    public IEnumerator RelocatedTargetPopFindsHudAndFont()
     {
-        const string relocated = "Assets/Samples/Apple Watch Controller/Relocated";
-        AssetDatabase.CreateFolder("Assets/Samples/Apple Watch Controller", "Relocated");
-        Assert.That(AssetDatabase.MoveAsset(sampleRoot, relocated + "/Target Pop"), Is.Empty);
-        try
-        {
-            TargetPopSampleSetup.Create(relocated + "/Target Pop", ScenePath);
-            var document = SceneManager.GetActiveScene().GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<UIDocument>()).Single();
-            Assert.That(AssetDatabase.GetAssetPath(document.visualTreeAsset), Is.EqualTo(relocated + "/Target Pop/Demo/WatchDemoHud.uxml"));
-            var font = AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Task4TargetTests/DemoAssets/DemoFont.asset");
-            Assert.That(font.sourceFontFile, Is.EqualTo(AssetDatabase.LoadAssetAtPath<Font>(relocated + "/Target Pop/Demo/Inter.ttf")));
-            Assert.That(AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(document.panelSettings.themeStyleSheet)), Does.Contain(relocated + "/Target Pop/Demo/WatchDemoHud.uss"));
-            CollectionAssert.AreEqual(beforeScenes.Select(s => (s.path, s.enabled)), EditorBuildSettings.scenes.Select(s => (s.path, s.enabled)));
-        }
-        finally
-        {
-            EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
-            Assert.That(AssetDatabase.MoveAsset(relocated + "/Target Pop", sampleRoot), Is.Empty);
-            AssetDatabase.DeleteAsset(relocated);
-        }
+        Assert.That(AssetDatabase.IsValidFolder(RelocatedFolder), Is.False, "Do not overwrite an existing relocation folder.");
+        Assert.That(AssetDatabase.CreateFolder("Assets/Samples/Apple Watch Controller", "Relocated"), Is.Not.Empty);
+        relocationFolderCreated = true;
+        Assert.That(AssetDatabase.MoveAsset(sampleRoot, RelocatedSampleRoot), Is.Empty);
+        // Moving the complete sample also moves its asmdefs. Resume only after their expected reload.
+        yield return new RecompileScripts();
+        TargetPopSampleSetup.Create(RelocatedSampleRoot, ScenePath);
+        var document = SceneManager.GetActiveScene().GetRootGameObjects().SelectMany(r => r.GetComponentsInChildren<UIDocument>()).Single();
+        Assert.That(AssetDatabase.GetAssetPath(document.visualTreeAsset), Is.EqualTo(RelocatedSampleRoot + "/Demo/WatchDemoHud.uxml"));
+        var font = AssetDatabase.LoadAssetAtPath<UnityEngine.TextCore.Text.FontAsset>("Assets/Task4TargetTests/DemoAssets/DemoFont.asset");
+        Assert.That(font.sourceFontFile, Is.EqualTo(AssetDatabase.LoadAssetAtPath<Font>(RelocatedSampleRoot + "/Demo/Inter.ttf")));
+        Assert.That(AssetDatabase.GetDependencies(AssetDatabase.GetAssetPath(document.panelSettings.themeStyleSheet)), Does.Contain(RelocatedSampleRoot + "/Demo/WatchDemoHud.uss"));
+        CollectionAssert.AreEqual(beforeScenes.Select(s => (s.path, s.enabled)), EditorBuildSettings.scenes.Select(s => (s.path, s.enabled)));
     }
 
     [Test]

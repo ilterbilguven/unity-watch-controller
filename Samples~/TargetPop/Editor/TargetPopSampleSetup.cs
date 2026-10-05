@@ -94,8 +94,8 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             AssetDatabase.ImportAsset(HudPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             AssetDatabase.ImportAsset(sampleRoot + "/Demo/Inter.ttf", ImportAssetOptions.ForceSynchronousImport);
             AssetDatabase.ImportAsset(sampleRoot + "/Demo/WatchDemoTheme.tss", ImportAssetOptions.ForceSynchronousImport);
-            var hudAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudPath);
-            if (hudAsset == null) throw new InvalidOperationException("The demo HUD source is missing.");
+            if (AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudPath) == null)
+                throw new InvalidOperationException("The demo HUD source is missing.");
             if (AssetDatabase.LoadAssetAtPath<Font>(sampleRoot + "/Demo/Inter.ttf") == null ||
                 AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(sampleRoot + "/Demo/WatchDemoTheme.tss") == null)
                 throw new InvalidOperationException("The imported Target Pop font or theme is missing.");
@@ -241,7 +241,8 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             hudObject.transform.SetParent(root.transform);
             var document = hudObject.GetComponent<UIDocument>();
             document.panelSettings = panelSettings;
-            document.visualTreeAsset = hudAsset;
+            // NewScene can unload a preflight asset held only in a local variable.
+            document.visualTreeAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(HudPath);
             var hud = hudObject.AddComponent<AppleWatchDemoHud>();
             Assign(hud, ("controller", controller), ("game", game), ("audioFeedback", audio), ("arenaCamera", camera));
             EditorUtility.SetDirty(font);
