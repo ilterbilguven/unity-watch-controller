@@ -36,11 +36,50 @@ public sealed class AppleWatchDemoAudioTests : InputTestFixture
     [TearDown]
     public override void TearDown()
     {
-        if (demo != null)
-            UnityEngine.Object.DestroyImmediate(demo);
+        CleanupDemo();
         foreach (var device in InputSystem.devices.OfType<AppleWatchControllerDevice>().ToArray())
             InputSystem.RemoveDevice(device);
         base.TearDown();
+    }
+
+    [Test]
+    public void FixtureCleanupReleasesEveryOwnedGeneratedClip()
+    {
+        Invoke("PlaySimulationTone");
+        var generated = ((System.Collections.IDictionary)audioType
+            .GetField("effects", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(audio))
+            .Values.Cast<AudioClip>().ToArray();
+        var simulation = (AudioClip)audioType.GetField("simulationClip",
+            BindingFlags.Instance | BindingFlags.NonPublic).GetValue(audio);
+        Assert.That(generated, Is.Not.Empty, "The actual fixture must have generated effect tones.");
+        Assert.That(generated.All(clip => clip != null), Is.True);
+        Assert.That(simulation != null, Is.True, "Exercise simulation ownership as well as effects.");
+        var owned = generated.Concat(new[] { simulation }).ToArray();
+        try
+        {
+            CleanupDemo();
+            var retained = owned.Where(clip => clip != null)
+                .Select(clip => clip.GetEntityId() + ":" + clip.name).ToArray();
+            Assert.That(retained, Is.Empty,
+                "Normal fixture cleanup must release all " + generated.Length + " effects and its simulation clip.");
+        }
+        finally
+        {
+            // RED recovery is limited to these exact fixture-owned references.
+            foreach (var clip in owned)
+                if (clip != null) UnityEngine.Object.DestroyImmediate(clip);
+        }
+    }
+
+    private void CleanupDemo()
+    {
+        if (demo != null)
+        {
+            // Setup invokes OnEnable manually in EditMode; match that lifecycle
+            // before destruction, which does not promise an OnDisable callback.
+            Invoke("OnDisable");
+            UnityEngine.Object.DestroyImmediate(demo);
+        }
     }
 
     [Test]
