@@ -242,20 +242,26 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             if (running) throw new InvalidOperationException("A demo probe is already running.");
             if (width < 320 || width > 2560 || height < 320 || height > 2560)
                 throw new ArgumentException("Capture dimensions must be between 320 and 2560.");
-            running = true;
             var camera = root.GetComponentInChildren<Camera>();
-            var panel = root.GetComponentInChildren<UIDocument>().panelSettings;
+            var document = root.GetComponentInChildren<UIDocument>();
+            var panel = document != null ? document.panelSettings : null;
+            if (camera == null || panel == null)
+                throw new InvalidOperationException("Capture requires a live demo camera and HUD panel settings.");
             var previousCamera = camera.targetTexture;
             var previousPanel = panel.targetTexture;
             var previousActive = RenderTexture.active;
-            var texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+            RenderTexture texture = null;
             Texture2D pixels = null;
+            running = true;
             try
             {
+                texture = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
                 texture.Create();
                 camera.targetTexture = texture;
                 panel.targetTexture = texture;
                 await WaitForFrames(0.3f, null);
+                if (camera == null || panel == null)
+                    throw new OperationCanceledException("The capture camera or HUD was destroyed during the probe.");
                 RenderTexture.active = texture;
                 pixels = new Texture2D(width, height, TextureFormat.RGBA32, false);
                 pixels.ReadPixels(new Rect(0, 0, width, height), 0, 0);
@@ -268,13 +274,31 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             }
             finally
             {
-                camera.targetTexture = previousCamera;
-                panel.targetTexture = previousPanel;
-                RenderTexture.active = previousActive;
-                if (pixels != null) UnityEngine.Object.DestroyImmediate(pixels);
-                texture.Release();
-                UnityEngine.Object.DestroyImmediate(texture);
-                running = false;
+                try
+                {
+                    try
+                    {
+                        try { if (camera != null) camera.targetTexture = previousCamera; }
+                        finally
+                        {
+                            if (panel != null) panel.targetTexture = previousPanel;
+                            RenderTexture.active = previousActive;
+                        }
+                    }
+                    finally
+                    {
+                        try { if (pixels != null) UnityEngine.Object.DestroyImmediate(pixels); }
+                        finally
+                        {
+                            if (texture != null)
+                            {
+                                try { texture.Release(); }
+                                finally { UnityEngine.Object.DestroyImmediate(texture); }
+                            }
+                        }
+                    }
+                }
+                finally { running = false; }
             }
         }
 

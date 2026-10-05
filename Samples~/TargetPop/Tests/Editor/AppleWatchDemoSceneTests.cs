@@ -142,3 +142,103 @@ public sealed class AppleWatchDemoSceneTests
         type.GetMethod("Create").Invoke(null, new object[] { "Assets/Samples/Apple Watch Controller/0.1.0-preview.1/Target Pop", path, startup });
     }
 }
+
+public sealed class AppleWatchDemoCaptureLifecycleTests
+{
+    private UnityEngine.SceneManagement.Scene originalActive;
+    private UnityEngine.SceneManagement.Scene temporaryScene;
+    private GameObject captureRoot;
+    private bool previousOptionsEnabled;
+    private EnterPlayModeOptions previousOptions;
+    private byte[] settingsBytes;
+    private PanelSettings panel;
+    private Type probe;
+    private FieldInfo gate;
+
+    [SetUp]
+    public void PrepareCaptureFixture()
+    {
+        Assert.That(EditorApplication.isPlayingOrWillChangePlaymode, Is.False);
+        previousOptionsEnabled = EditorSettings.enterPlayModeOptionsEnabled;
+        previousOptions = EditorSettings.enterPlayModeOptions;
+        settingsBytes = File.ReadAllBytes("ProjectSettings/EditorSettings.asset");
+        originalActive = SceneManager.GetActiveScene();
+        // EditMode Test Runner parks the user scenes and supplies this untitled scene.
+        // Do not save or replace it; create and destroy only our fixture root.
+        Assert.That(originalActive.path, Is.Empty, "This lifecycle fixture requires the runner-owned scene.");
+        temporaryScene = originalActive;
+        probe = Type.GetType("AppleWatchController.Samples.TargetPop.Editor.AppleWatchDemoProbe, AppleWatchController.Samples.TargetPop.Editor", true);
+        gate = probe.GetField("running", BindingFlags.Static | BindingFlags.NonPublic);
+        Assert.That((bool)gate.GetValue(null), Is.False, "Do not replace a pre-existing active probe.");
+        panel = ScriptableObject.CreateInstance<PanelSettings>();
+        EditorSettings.enterPlayModeOptionsEnabled = true;
+        EditorSettings.enterPlayModeOptions = EnterPlayModeOptions.DisableDomainReload | EnterPlayModeOptions.DisableSceneReload;
+    }
+
+    [UnityEngine.TestTools.UnityTearDown]
+    public System.Collections.IEnumerator RestoreCaptureFixture()
+    {
+        if (EditorApplication.isPlayingOrWillChangePlaymode)
+            yield return new UnityEngine.TestTools.ExitPlayMode();
+        // Test-owned recovery lets later tests run after an intentional RED.
+        gate?.SetValue(null, false);
+        if (panel != null && panel.targetTexture != null)
+        {
+            var leaked = panel.targetTexture;
+            panel.targetTexture = null;
+            if (RenderTexture.active == leaked) RenderTexture.active = null;
+            leaked.Release();
+            UnityEngine.Object.DestroyImmediate(leaked);
+        }
+        if (panel != null) UnityEngine.Object.DestroyImmediate(panel);
+        if (captureRoot != null) UnityEngine.Object.DestroyImmediate(captureRoot);
+        if (originalActive.IsValid() && originalActive.isLoaded) SceneManager.SetActiveScene(originalActive);
+        EditorSettings.enterPlayModeOptions = previousOptions;
+        EditorSettings.enterPlayModeOptionsEnabled = previousOptionsEnabled;
+        CollectionAssert.AreEqual(settingsBytes, File.ReadAllBytes("ProjectSettings/EditorSettings.asset"),
+            "Preserve disk settings, including any original difference from live values.");
+    }
+
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator CaptureMissingCameraDoesNotClaimGate() => ExerciseCapture("missing");
+
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator CaptureDestroyedCameraReleasesResourcesAndGate() => ExerciseCapture("destroyed");
+
+    [UnityEngine.TestTools.UnityTest]
+    public System.Collections.IEnumerator CaptureStopWithDomainReloadDisabledCancelsAndReleasesGate() => ExerciseCapture("stop");
+
+    private System.Collections.IEnumerator ExerciseCapture(string scenario)
+    {
+        yield return new UnityEngine.TestTools.EnterPlayMode(false);
+        Assert.That(EditorSettings.enterPlayModeOptions.HasFlag(EnterPlayModeOptions.DisableDomainReload), Is.True);
+        SceneManager.SetActiveScene(temporaryScene);
+        var root = new GameObject("Capture fixture", typeof(AppleWatchDemoGame), typeof(UIDocument));
+        captureRoot = root;
+        root.GetComponent<UIDocument>().panelSettings = panel;
+        Camera camera = null;
+        if (scenario != "missing")
+        {
+            camera = new GameObject("Capture camera", typeof(Camera)).GetComponent<Camera>();
+            camera.transform.SetParent(root.transform);
+        }
+        var task = (Task)probe.GetMethod("CaptureAsync").Invoke(null, new object[] { 320, 320 });
+        var target = panel.targetTexture;
+        if (camera != null) UnityEngine.Object.DestroyImmediate(camera.gameObject);
+        if (scenario == "stop")
+            yield return new UnityEngine.TestTools.ExitPlayMode();
+        var deadline = EditorApplication.timeSinceStartup + 5;
+        while (!task.IsCompleted && EditorApplication.timeSinceStartup < deadline) yield return null;
+        Assert.That(task.IsCompleted, Is.True, "Capture must complete or cancel promptly.");
+        Exception error = null;
+        try { task.GetAwaiter().GetResult(); }
+        catch (Exception failure) { error = failure; }
+        Assert.That((bool)gate.GetValue(null), Is.False, "The same loaded domain must release the static probe gate.");
+        if (target != null) Assert.Fail("Capture leaked its temporary render texture.");
+        Assert.That(panel == null || panel.targetTexture == null, Is.True, "The surviving HUD panel target must be restored.");
+        Assert.That(error, Is.InstanceOf<Exception>());
+        if (scenario == "missing") Assert.That(error, Is.TypeOf<InvalidOperationException>());
+        if (scenario == "stop") Assert.That(error, Is.InstanceOf<OperationCanceledException>());
+        if (root != null) UnityEngine.Object.DestroyImmediate(root);
+    }
+}
