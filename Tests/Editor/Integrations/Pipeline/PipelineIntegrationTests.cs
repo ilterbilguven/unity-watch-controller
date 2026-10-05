@@ -49,7 +49,10 @@ public sealed class PipelineIntegrationTests
 #else
         Assert.That(RegisteredCommands().Any(c => c.Name == "apple_watch_export_ios" || c.Name == "apple_watch_ios_sdk_state"), Is.False);
 #endif
-        Assert.That(RegisteredCommands().Any(c => c.Name == "apple_watch_remove_assistant"), Is.False);
+        // Consumers may retain private tooling with this name. The package must not
+        // register it or depend on it, but it does not own the consumer's command set.
+        Assert.That(RegisteredCommands().Any(c => c.Name == "apple_watch_remove_assistant"
+            && c.Method.DeclaringType.Assembly.GetName().Name.StartsWith("AppleWatchController.", StringComparison.Ordinal)), Is.False);
     }
 
     [UnityTest]
