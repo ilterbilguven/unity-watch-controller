@@ -9,6 +9,59 @@ using WatchUI;
 
 public sealed class WatchUiSwiftGeneratorTests
 {
+
+    [Test]
+    public void AuthoredIdentifiersCompileWithoutMemberCollisions()
+    {
+        if (Application.platform != RuntimePlatform.OSXEditor || !System.IO.File.Exists("/usr/bin/xcrun"))
+            Assert.Ignore("Complete generated Swift compilation requires macOS and Xcode.");
+
+        var ids = new[] { "class", "body", "navigationPath", "a-b", "a_b", "watchCrownValue" };
+        var toggles = ids.Select(id => new WatchUiNode
+            { kind = "WatchToggle", id = id, action = "toggle", label = id, boolValue = true }).ToArray();
+        var root = new WatchUiNode
+        {
+            kind = "WatchNavigationStack",
+            children = new[]
+            {
+                new WatchUiNode { kind = "WatchVStack", children = toggles },
+                new WatchUiNode { kind = "WatchCrown", id = "crown", action = "crown" }
+            }
+        };
+        Assert.That(WatchUiSwiftEmitter.TryToSwiftUI(root, out var swift, out var diagnostics),
+            Is.True, string.Join("\n", diagnostics.Errors));
+        foreach (var id in ids)
+            Assert.That(swift, Does.Contain("sourceId: \"" + id + "\""),
+                "Authored IDs stay intact in transport metadata.");
+        Assert.That(swift, Does.Contain("payload: [\"value\": (newValue ? 1 : 0)]"),
+            "The naming policy must not alter the existing toggle input payload.");
+        var directory = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "watch-ui-members-" + Guid.NewGuid().ToString("N"));
+        System.IO.Directory.CreateDirectory(directory);
+        try
+        {
+            var source = System.IO.Path.Combine(directory, "Generated.swift");
+            System.IO.File.WriteAllText(source, swift);
+            using var process = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "/usr/bin/xcrun",
+                Arguments = "--sdk watchos swiftc -emit-object -o /dev/null -parse-as-library -warnings-as-errors -swift-version 5 -target arm64_32-apple-watchos11.0 \"" + source + "\"",
+                UseShellExecute = false, RedirectStandardOutput = true, RedirectStandardError = true
+            });
+            Assert.That(process, Is.Not.Null);
+            var output = process.StandardOutput.ReadToEndAsync();
+            var errors = process.StandardError.ReadToEndAsync();
+            if (!process.WaitForExit(30000))
+            {
+                process.Kill();
+                Assert.Fail("Complete generated Swift compilation timed out (30-second policy unchanged).");
+            }
+            Assert.That(process.ExitCode, Is.Zero, output.GetAwaiter().GetResult() + errors.GetAwaiter().GetResult());
+        }
+        finally
+        {
+            System.IO.Directory.Delete(directory, true);
+        }
+    }
     [Test]
     public void AuthoredMotionExportsOptInAttitudeAtTwentyHertz()
     {

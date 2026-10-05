@@ -142,7 +142,26 @@ namespace WatchUI
             public readonly Dictionary<WatchUiNode, string> StepperStateNames = new();
             public readonly Dictionary<WatchUiNode, string> PickerStateNames = new();
             public readonly Dictionary<WatchUiNode, (string Value, string Previous, string Focus)> CrownStateNames = new();
-            public readonly HashSet<string> UsedStateNames = new();
+            // Reserve fixed view members and their property-wrapper storage.
+            // Every authored and Crown state member goes through the allocator.
+            public readonly HashSet<string> UsedStateNames = new()
+            {
+                "body", "_body", "__body",
+                "navigationPath", "_navigationPath", "__navigationPath"
+            };
+
+            private static readonly HashSet<string> SwiftKeywords = new()
+            {
+                "_", "associatedtype", "class", "deinit", "enum", "extension", "fileprivate",
+                "func", "import", "init", "inout", "internal", "let", "open", "operator",
+                "private", "precedencegroup", "protocol", "public", "rethrows", "static",
+                "struct", "subscript", "typealias", "var", "break", "case", "catch",
+                "continue", "default", "defer", "do", "else", "fallthrough", "for",
+                "guard", "if", "in", "repeat", "return", "throw", "switch", "where",
+                "while", "as", "Any", "false", "is", "nil", "self", "Self", "super",
+                "throws", "true", "try", "Type", "Protocol", "async", "await", "actor",
+                "some", "any", "borrowing", "consuming", "nonisolated", "isolated"
+            };
 
             public (string Value, string Previous, string Focus) ResolveCrownStateNames(WatchUiNode node)
             {
@@ -271,23 +290,22 @@ namespace WatchUI
 
             private string EnsureUniqueIdentifier(string identifier)
             {
-                if (!UsedStateNames.Contains(identifier))
-                {
-                    UsedStateNames.Add(identifier);
-                    return identifier;
-                }
+                identifier = MakeSwiftIdentifier(identifier);
+                if (SwiftKeywords.Contains(identifier))
+                    identifier = "watchState_" + identifier;
 
-                var suffix = 2;
-                while (true)
+                var candidate = identifier;
+                for (var suffix = 2; ; suffix++)
                 {
-                    var candidate = $"{identifier}_{suffix}";
-                    if (!UsedStateNames.Contains(candidate))
+                    if (!UsedStateNames.Contains(candidate) && !UsedStateNames.Contains("_" + candidate)
+                        && !UsedStateNames.Contains("__" + candidate))
                     {
                         UsedStateNames.Add(candidate);
+                        UsedStateNames.Add("_" + candidate);
+                        UsedStateNames.Add("__" + candidate);
                         return candidate;
                     }
-
-                    suffix++;
+                    candidate = $"{identifier}_{suffix}";
                 }
             }
         }
