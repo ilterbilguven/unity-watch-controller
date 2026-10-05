@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEditor;
@@ -15,6 +16,53 @@ public sealed class BasicControllerSampleTests : InputTestFixture
     private readonly string sampleRoot;
     public BasicControllerSampleTests(string sampleRoot) => this.sampleRoot = sampleRoot;
 
+
+    [TestCase("Target.mat")]
+    public void MissingScenePreservesExistingOutputAssets(string outputName)
+    {
+        var folder = "Assets/WatchOutputConflict_" + Guid.NewGuid().ToString("N");
+        AssetDatabase.CreateFolder("Assets", System.IO.Path.GetFileName(folder));
+        AssetDatabase.CreateFolder(folder, "DemoAssets");
+        var output = folder + "/DemoAssets/" + outputName;
+        UnityEngine.Object asset;
+        if (outputName.EndsWith(".mat"))
+        {
+            var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
+            material.SetColor("_BaseColor", Color.magenta);
+            asset = material;
+        }
+        else if (outputName == "DemoFont.asset")
+            asset = ScriptableObject.CreateInstance<UnityEngine.TextCore.Text.FontAsset>();
+        else if (outputName == "TextSettings.asset")
+            asset = ScriptableObject.CreateInstance<UnityEngine.UIElements.PanelTextSettings>();
+        else
+            asset = ScriptableObject.CreateInstance<UnityEngine.UIElements.PanelSettings>();
+        asset.name = "Customized existing output";
+        AssetDatabase.CreateAsset(asset, output);
+        var before = System.IO.Directory.GetFiles(folder, "*", System.IO.SearchOption.AllDirectories)
+            .ToDictionary(path => path, System.IO.File.ReadAllBytes);
+        var guid = AssetDatabase.AssetPathToGUID(output);
+        var scenes = EditorSceneManager.GetSceneManagerSetup();
+        var build = EditorBuildSettings.scenes.Select(item => (item.path, item.enabled)).ToArray();
+        try
+        {
+            var error = Assert.Throws<InvalidOperationException>(() => BasicControllerSampleSetup.Create(sampleRoot, folder + "/Demo.unity", true));
+            Assert.That(error.Message, Does.Contain(output), "Reject the specific occupied output, not an unrelated prerequisite.");
+            var after = System.IO.Directory.GetFiles(folder, "*", System.IO.SearchOption.AllDirectories);
+            CollectionAssert.AreEquivalent(before.Keys, after, "Preflight must not create any other output.");
+            foreach (var pair in before)
+                CollectionAssert.AreEqual(pair.Value, System.IO.File.ReadAllBytes(pair.Key), pair.Key);
+            Assert.That(AssetDatabase.AssetPathToGUID(output), Is.EqualTo(guid));
+            Assert.That(System.IO.File.Exists(folder + "/Demo.unity"), Is.False);
+            CollectionAssert.AreEqual(scenes.Select(item => (item.path, item.isLoaded, item.isActive)),
+                EditorSceneManager.GetSceneManagerSetup().Select(item => (item.path, item.isLoaded, item.isActive)));
+            CollectionAssert.AreEqual(build, EditorBuildSettings.scenes.Select(item => (item.path, item.enabled)));
+        }
+        finally
+        {
+            AssetDatabase.DeleteAsset(folder);
+        }
+    }
     [Test]
     public void DirtySceneIsNotDiscarded()
     {

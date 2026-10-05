@@ -39,8 +39,9 @@ namespace AppleWatchController.Samples.BasicController.Editor
             if (existed) EditorSceneManager.OpenScene(scenePath, OpenSceneMode.Single);
             else
             {
-                EnsureFolder(Path.GetDirectoryName(scenePath).Replace('\\', '/'));
                 var assets = Path.GetDirectoryName(scenePath).Replace('\\', '/') + "/" + Path.GetFileNameWithoutExtension(scenePath) + "Assets";
+                PreflightOutputs(scenePath, assets + "/Target.mat");
+                EnsureFolder(Path.GetDirectoryName(scenePath).Replace('\\', '/'));
                 EnsureFolder(assets);
                 var material = new Material(Shader.Find("Universal Render Pipeline/Lit"));
                 material.name = "Controller Target";
@@ -69,7 +70,6 @@ namespace AppleWatchController.Samples.BasicController.Editor
                 var light = new GameObject("Key Light", typeof(Light)).GetComponent<Light>();
                 light.type = LightType.Directional;
                 light.transform.rotation = Quaternion.Euler(45, -30, 0);
-                AssetDatabase.SaveAssets();
                 EditorSceneManager.SaveScene(scene, scenePath);
             }
             if (makeStartupScene)
@@ -78,6 +78,18 @@ namespace AppleWatchController.Samples.BasicController.Editor
             return new { Status = existed ? "opened" : "created", ScenePath = scenePath };
         }
 
+
+        private static void PreflightOutputs(params string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                if (File.Exists(path) || Directory.Exists(path) || File.Exists(path + ".meta"))
+                    throw new InvalidOperationException("Sample setup output already exists: " + path + ". Choose a new scene name or move the existing asset.");
+                for (var parent = Path.GetDirectoryName(path); !string.IsNullOrEmpty(parent); parent = Path.GetDirectoryName(parent))
+                    if (File.Exists(parent))
+                        throw new InvalidOperationException("Sample setup output folder is occupied: " + parent);
+            }
+        }
         private static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;

@@ -83,6 +83,13 @@ namespace AppleWatchController.Samples.TargetPop.Editor
                 return new { Status = "opened", ScenePath = scenePath };
             }
 
+            var folder = Path.GetDirectoryName(scenePath).Replace('\\', '/');
+            var assets = folder + "/" + Path.GetFileNameWithoutExtension(scenePath) + "Assets";
+            PreflightOutputs(new[] { scenePath }.Concat(new[]
+            {
+                "Floor.mat", "Grid.mat", "Edge.mat", "Cyan.mat", "CyanGlow.mat", "Amber.mat", "AmberGlow.mat", "Violet.mat", "Green.mat", "Touch.mat", "DemoFont.asset", "TextSettings.asset", "PanelSettings.asset"
+            }.Select(name => assets + "/" + name)).ToArray());
+
             var HudPath = sampleRoot + "/Demo/WatchDemoHud.uxml";
             AssetDatabase.ImportAsset(HudPath, ImportAssetOptions.ForceSynchronousImport | ImportAssetOptions.ForceUpdate);
             AssetDatabase.ImportAsset(sampleRoot + "/Demo/Inter.ttf", ImportAssetOptions.ForceSynchronousImport);
@@ -92,8 +99,6 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             if (AssetDatabase.LoadAssetAtPath<Font>(sampleRoot + "/Demo/Inter.ttf") == null ||
                 AssetDatabase.LoadAssetAtPath<ThemeStyleSheet>(sampleRoot + "/Demo/WatchDemoTheme.tss") == null)
                 throw new InvalidOperationException("The imported Target Pop font or theme is missing.");
-            var folder = Path.GetDirectoryName(scenePath).Replace('\\', '/');
-            var assets = folder + "/" + Path.GetFileNameWithoutExtension(scenePath) + "Assets";
             EnsureFolder(assets);
 
             var floorMaterial = Material(assets, "Floor", new Color(0.025f, 0.055f, 0.085f), false);
@@ -239,7 +244,8 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             document.visualTreeAsset = hudAsset;
             var hud = hudObject.AddComponent<AppleWatchDemoHud>();
             Assign(hud, ("controller", controller), ("game", game), ("audioFeedback", audio), ("arenaCamera", camera));
-            AssetDatabase.SaveAssets();
+            EditorUtility.SetDirty(font);
+            AssetDatabase.SaveAssetIfDirty(font);
             EditorSceneManager.SaveScene(scene, scenePath);
             if (makeStartupScene) SetStartup(scenePath);
             Selection.activeGameObject = root;
@@ -312,6 +318,18 @@ namespace AppleWatchController.Samples.TargetPop.Editor
             serialized.ApplyModifiedPropertiesWithoutUndo();
         }
 
+
+        private static void PreflightOutputs(params string[] paths)
+        {
+            foreach (var path in paths)
+            {
+                if (File.Exists(path) || Directory.Exists(path) || File.Exists(path + ".meta"))
+                    throw new InvalidOperationException("Sample setup output already exists: " + path + ". Choose a new scene name or move the existing asset.");
+                for (var parent = Path.GetDirectoryName(path); !string.IsNullOrEmpty(parent); parent = Path.GetDirectoryName(parent))
+                    if (File.Exists(parent))
+                        throw new InvalidOperationException("Sample setup output folder is occupied: " + parent);
+            }
+        }
         private static void EnsureFolder(string path)
         {
             if (AssetDatabase.IsValidFolder(path)) return;
